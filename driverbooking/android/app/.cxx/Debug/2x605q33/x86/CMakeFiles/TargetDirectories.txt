@@ -1,0 +1,2 @@
+C:/fahadnotofication/NASTAF-Driver-Application-begood/driverbooking/android/app/.cxx/Debug/2x605q33/x86/CMakeFiles/edit_cache.dir
+C:/fahadnotofication/NASTAF-Driver-Application-begood/driverbooking/android/app/.cxx/Debug/2x605q33/x86/CMakeFiles/rebuild_cache.dir
