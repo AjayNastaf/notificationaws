@@ -15,24 +15,24 @@ class AppConstants {
   static const String navigation = 'assets/image/navigation.png';
   static const String cabgif = 'assets/image/cab.gif';
   static const String signup = 'assets/image/signup.jpg';
+  static const String signupnew='assets/image/signupnew.webp';
 
 
 
   //local
-  // static const String baseUrl = "http://192.168.0.120:3003";
+  // static const String baseUrl = "http://192.168.0.105:3006";
   // static const String baseUrl = "https://192.168.1.145:7128";
 
 
 
-  // static const String baseUrlJessyCabs = "https://jessycabs.com:54462";
-  // static const String baseUrlJessyCabs = "http://192.168.1.11:8081";
 
   //jessycabs
   // static const String baseUrl = "https://jessycabs.com:7128";
+  // static const String baseUrl = "https://210.18.139.40:7128";
 
-
-  //aws
   static const String baseUrl = "http://52.91.161.155:7128";
+  // static const String baseUrl = "http://192.168.0.105:3006";
+
 
 
   static const Color primaryColor = Colors.blue;

@@ -11,12 +11,16 @@ const db = require('../db');
 //app.use(express.json());
 //app.use(express.urlencoded({ extended: true }));
 
-// Twilio configuration
-const accountSid = process.env.TWILIO_SID;
-const accountToken = process.env.TWILIO_AUTH_TOKEN;
-const accountNumber = process.env.TWILIO_PHONE_NUMBER;
-const twilioClient = twilio(accountSid, accountToken);
 
+
+
+  const now = new Date();
+
+       const formattedDate = now.getFullYear() +
+         '/' + String(now.getMonth() + 1).padStart(2, '0') +
+         '/' + String(now.getDate()).padStart(2, '0');
+
+       console.log('date format',formattedDate); // Example: "2025/06/23"
 
 
 function generateOTP() {
@@ -24,13 +28,14 @@ function generateOTP() {
 }
 
 router.post('/send-otp', async (req, res) => {
-const { mobile, email, name, senderEmail, senderPass } = req.body;
+const { mobile, email, name, senderEmail, senderPass, tripId } = req.body;
 
-  // console.log('Raw request body:', req.body);
-  // console.log('Raw request body:', mobile);
-  // console.log('Raw request body:', email);
-  // console.log('Raw request body:', name);
+   console.log('Raw request body:', req.body);
+   console.log('Raw request body:', mobile);
+   console.log('Raw request body:', email);
 
+   console.log('Raw request body:', name);
+   console.log('Raw request body:',tripId );
   if (!email || !mobile) {
     return res.status(400).json({ message: "Email and mobile are required" });
   }
@@ -88,7 +93,7 @@ const { mobile, email, name, senderEmail, senderPass } = req.body;
     }
 
     const { MessageErrorCode, MessageErrorDescription, MessageId } = smsData;
-    // console.log(MessageErrorCode, MessageErrorDescription, MessageId ,"smsrerr")
+     console.log(MessageErrorCode, MessageErrorDescription, MessageId ,"smsrerr")
 
     if (MessageErrorCode !== 0) {
       console.error('SMS Error:', MessageErrorDescription);
@@ -100,11 +105,22 @@ const { mobile, email, name, senderEmail, senderPass } = req.body;
       });
     }
 
+        const insertQuery = `INSERT INTO smsreport (SmsMessageid, smsDate, tripid) VALUES (?, ?, ?)`;
+
+       db.query(insertQuery, [MessageId, formattedDate, tripId], (err) => {
+                      if(err){
+                      return res.status(400).send({ message : "Server Error"});
+                      }
+                console.log("inserted messageId and Date for onboard");
+
+
     // console.log(' SMS sent successfully, Message ID:', MessageId);
     return res.status(200).json({
       message: "OTP sent via Email and SMS",
       otp,
       messageId: MessageId,
+    });
+
     });
 
   } catch (err) {
@@ -118,7 +134,7 @@ const { mobile, email, name, senderEmail, senderPass } = req.body;
 // Last OTP
 
 // router.post('/verifyotp', async (req, res) => {
-  
+
 //   const { mobile,email, name } = req.body;
 
 //         console.log('Raw request body2:', req.body);
@@ -145,7 +161,7 @@ const { mobile, email, name, senderEmail, senderPass } = req.body;
 //     try {
 //         await transporter.sendMail(mailOptions);
 //         console.log("Email send success last");
- 
+
 //         return res.status(200).json({ message: "OTP sent via Email and SMS", otp });
 //     } catch (err) {
 //         console.error("Error sending OTP:", err);
@@ -155,7 +171,7 @@ const { mobile, email, name, senderEmail, senderPass } = req.body;
 
 
 router.post('/verifyotp', async (req, res) => {
-const { mobile, email, name, senderEmail, senderPass } = req.body;
+const { mobile, email, name, senderEmail, senderPass, tripId} = req.body;
   // console.log('Raw request body 2:', req.body);
 
   if (!email || !mobile) {
@@ -235,13 +251,21 @@ const { mobile, email, name, senderEmail, senderPass } = req.body;
       });
     }
 
+          const insertQuery = `INSERT INTO smsreport (SmsMessageid, smsDate, tripid) VALUES (?, ?, ?)`;
+
+          db.query(insertQuery, [MessageId, formattedDate, tripId], (err) => {
+                              if(err){
+                              return res.status(400).send({ message : "Server Error"});
+                              }
+                        console.log("inserted messageId and Date for deboard");
+
     // console.log(' SMS sent successfully, Message ID:', MessageId);
     return res.status(200).json({
       message: "OTP sent via Email and SMS",
       otp,
       messageId: MessageId,
     });
-
+});
   } catch (err) {
     console.error(" Error sending OTP:", err.message || err);
     return res.status(500).json({ message: "Failed to send OTP", error: err.message });

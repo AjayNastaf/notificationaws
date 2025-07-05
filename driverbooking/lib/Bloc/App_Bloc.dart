@@ -1525,10 +1525,10 @@ class DocumentImagesBloc extends Bloc<DocumentImagesEvent, DocumentImagesState> 
       print("🖼 parking KM Image URL: $ParkingImage");
 
       emit(DocumentImagesLoaded(
+        // startKmImage: startKmImage != null ? "${AppConstants.baseUrl}/uploads/$startKmImage" : null,
         startKmImage: startKmImage != null ? "${AppConstants.baseUrl}/uploads/$startKmImage" : null,
         closingKmImage: closingKmImage != null ? "${AppConstants.baseUrl}/uploads/$closingKmImage" : null,
-        // TollImage: TollImage != null ? "${AppConstants.baseUrl}/uploads/$TollImage" : null,
-        // ParkingImage: ParkingImage != null ? "${AppConstants.baseUrl}/uploads/$ParkingImage" : null,
+
         TollImage: TollImage.map((image) => "${AppConstants.baseUrl}/uploads/$image").toList(),
         ParkingImage: ParkingImage.map((image) => "${AppConstants.baseUrl}/uploads/$image").toList(),
       ));
@@ -1573,7 +1573,6 @@ class GettingClosingKilometerBloc extends Bloc<GettingClosingKilometerEvent, Get
 
 
 
-
 class OtpBloc extends Bloc<OtpEvent, OTPState> {
   OtpBloc() : super(OTPInitial()) {
     on<OtpEvent>(_onOtpRequested);
@@ -1584,15 +1583,20 @@ class OtpBloc extends Bloc<OtpEvent, OTPState> {
     print('Bloc Received data ${event.guestEmail}');
     print('Bloc Received data ${event.guestNumber}');
     print('Bloc Received data ${event.guestName}');
+    print("Bloc Received data ${event.tripId}");
     emit(OTPLoading());
     try {
       // final response = await ApiService.sendOtp(event.guestNumber, event.guestEmail);
-      final response = await ApiService.sendOtp(number: event.guestNumber, email: event.guestEmail, name: event.guestName,  senderEmail: event.senderEmail,senderPass: event.senderPass,);
+      final response = await ApiService.sendOtp(number: event.guestNumber, email: event.guestEmail, name: event.guestName,  senderEmail: event.senderEmail,senderPass: event.senderPass, tripId: event.tripId);
       ;
-      if (response['otp'] != null) {
+      print("responseee for otp ${response}");
+      if (response['success'] == true) {
         emit(OTPSuccess(response['otp'].toString()));
-      } else {
+        return;
+      } else if(response['success']== false){
+        print("OTP not found in response");
         emit(OTPFailed('OTP not found in response'));
+        return;
       }
     } catch (e) {
       emit(OTPFailed(e.toString()));
@@ -1612,10 +1616,11 @@ class LastOtBloc extends Bloc<OtpVerifyEvent, OtpVerifyState>{
     print('Bloc Received Last Otp info ${event.guestName}');
     print('Bloc Received Last Otp info ${event.guestEmail}');
     print('Bloc Received Last Otp info ${event.guestNumber}');
+    print('Bloc Received Last Otp info ${event.tripId}');
     emit(LastOtpLoading());
 
     try{
-      final response = await ApiService.verifyOtp(number: event.guestNumber, email: event.guestEmail, name: event.guestName, senderEmail: event.senderEmail, senderPass: event.senderPass);
+      final response = await ApiService.verifyOtp(number: event.guestNumber, email: event.guestEmail, name: event.guestName, senderEmail: event.senderEmail, senderPass: event.senderPass, tripId: event.tripId);
       if(response['otp'] != null){
         emit(LastOtpSuccess(response['otp'].toString()));
       } else{
@@ -1753,9 +1758,11 @@ void _onSignupAttepmt(SignupRequested event, Emitter<SignupState> emit) async {
   emit(SignUpLoading());
   try {
     final response = await ApiService.signUpStepOne(
-        name: event.name, email: event.email, phone: event.phone);
+        // name: event.name, email: event.email, phone: event.phone);
+    name: event.name, email: event.email, phone: event.phone, vechiNo: event.vechiNo, );
 
-    print('first step response from Api_Service ${response}');
+
+  print('first step response from Api_Service ${response}');
 
     if (response['success'] == true) {
       final otp = response['otp']?.toString() ?? '';

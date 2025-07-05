@@ -525,7 +525,7 @@ class _EditRideDetailsState extends State<EditRideDetails> {
                               buildSectionTitle("Toll image"),
                               // state.TollImage != null
                               //     ? Image.network(state.TollImage!, width: double.infinity, height: 200, fit: BoxFit.cover)
-                              state.TollImage != null && state.TollImage!.isNotEmpty
+                              state.TollImage !=null && state.TollImage!.isNotEmpty
                                   ? Column(
                                 children: state.TollImage!.toSet().map((url) {  // Convert to Set to remove duplicates
                                   return Padding(

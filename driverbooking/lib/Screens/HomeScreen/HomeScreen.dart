@@ -295,6 +295,7 @@
 
 
 import 'dart:convert';
+import 'package:flutter/services.dart';
 import 'package:jessy_cabs/Bloc/AppBloc_State.dart';
 import 'package:jessy_cabs/Bloc/App_Bloc.dart';
 import 'package:jessy_cabs/Bloc/AppBloc_Events.dart';
@@ -314,15 +315,19 @@ import 'package:jessy_cabs/Networks/Api_Service.dart';
 import 'package:jessy_cabs/Utils/AllImports.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:io';
-import 'package:flutter/services.dart';
-import 'package:flutter_overlay_window/flutter_overlay_window.dart';
-import 'package:android_intent_plus/android_intent.dart';
+
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
 import '../NoInternetBanner/NoInternetBanner.dart';
 import 'package:provider/provider.dart';
 import '../network_manager.dart';
+
+
+import 'package:flutter/services.dart';
+import 'package:flutter_overlay_window/flutter_overlay_window.dart';
+import 'package:android_intent_plus/android_intent.dart';
+
 
 class Homescreen extends StatefulWidget {
   final String userId;
@@ -356,6 +361,8 @@ class _HomescreenState extends State<Homescreen> {
     // _getUserDetailsDriver();
     /// Dispatch the event when the screen loads
     saveScreenData();
+    _loadUsernameFromPrefs();
+    loadDutyStatus();
 
     print('Userhone: ${widget.userId}, Usernameddd: ${widget.username}');
     _loadUserData();
@@ -373,15 +380,54 @@ class _HomescreenState extends State<Homescreen> {
   }
 
   Future<void> _refreshData() async {
-    BlocProvider.of<TripSheetValuesBloc>(context).add(
-      FetchTripSheetValues(
-        userid: widget.userId,
-        drivername: userData?['drivername'] ?? 'Not Found',
-      ),
-    );
+
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    username = pref.getString('username');
+
+    print("geted username in home page from local storage ${username}");
+    loadDutyStatus();
+
+    if (username != null) {
+      BlocProvider.of<TripSheetValuesBloc>(context).add(
+        FetchTripSheetValues(
+          userid: widget.userId,
+          drivername: username!,
+        ),
+      );
+      print('dispatched with help of refresh data of username');
+    }
+
+
+    if (userData?['drivername'] != null) {
+      BlocProvider.of<TripSheetValuesBloc>(context).add(
+        FetchTripSheetValues(
+          userid: widget.userId,
+          drivername: userData!['drivername'],
+        ),
+      );
+      print('dispatched with help of refresh data of userData');
+
+    }
+
+    // BlocProvider.of<TripSheetValuesBloc>(context).add(
+    //   FetchTripSheetValues(
+    //     userid: widget.userId,
+    //     drivername: userData?['drivername'] ?? 'not found',
+    //   ),
+    // );
+
     context.read<DrawerDriverDataBloc>().add(DrawerDriverData(widget.username));
 
   }
+
+  void _loadUsernameFromPrefs() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    setState(() {
+      username = pref.getString('username');
+    });
+    print("geted username in home page from initState $username");
+  }
+
 
   Future<void> saveScreenData() async {
 
@@ -406,96 +452,35 @@ class _HomescreenState extends State<Homescreen> {
   }
 
 
-
-
-
-
-
   static const platform = MethodChannel('com.example.jessy_cabs/background');
-
-
-
-
-
-
-
-
-
-
-
-  // Function to request overlay permission
-
-
 
   Future<void> requestOverlayPermission() async {
 
-
-
     const intent = AndroidIntent(
-
-
-
       action: 'android.settings.action.MANAGE_OVERLAY_PERMISSION',
-
-
-
       data: 'package:com.example.jessy_cabs',
-
-
-
     );
-
-
 
     await intent.launch();
 
-
-
   }
-
-
-
-
-
-
-
   // Function to start background service + floating icon
 
 
 
+
+
   Future<void> onDuty() async {
-
-
-
     try {
-
-
-
       await requestOverlayPermission(); // Ask permission before showing overlay
-
-
-
       await platform.invokeMethod("startBackgroundService");
-
-
-
       await platform.invokeMethod("startFloatingIcon");
-
-
-
     } catch (e) {
-
-
-
       print("Error in onDuty: $e");
-
-
-
     }
-
-
-
   }
+
+
 
 
 
@@ -505,45 +490,25 @@ class _HomescreenState extends State<Homescreen> {
 
   // Function to stop background service + floating icon
 
+
+
   Future<void> offDuty() async {
-
-
-
     try {
-
-
-
       await platform.invokeMethod("stopBackgroundService");
-
-
-
       await platform.invokeMethod("stopFloatingIcon");
 
-
-
     } catch (e) {
-
-
-
       print("Error in offDuty: $e");
 
-
-
     }
-
-
 
   }
 
 
 
-
-
-
-
   // Toggle handler
-  Future<void> toggleFloatingService(bool value) async {
 
+  Future<void> toggleFloatingService(bool value) async {
     if (value) {
 
       await onDuty();
@@ -555,6 +520,8 @@ class _HomescreenState extends State<Homescreen> {
     }
 
   }
+
+
 
 
 
@@ -740,6 +707,12 @@ class _HomescreenState extends State<Homescreen> {
   //   }
   // }
 
+  void loadDutyStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    final storedValue = prefs.getBool('isOnDuty') ?? false;
+    setState(() => isOnDuty = storedValue);
+  }
+
 
   Future<void> clearSharedPreferences() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -794,7 +767,9 @@ class _HomescreenState extends State<Homescreen> {
     print("Building UI with userData: $userData"); // Debugging
     bool isConnected = Provider.of<NetworkManager>(context).isConnected;
 
-    return Scaffold(
+    return PopScope(
+      canPop: false,
+      child: Scaffold(
       key: _scaffoldKey,
       //   drawer: Drawer(
       //   child: ListView(
@@ -1362,188 +1337,187 @@ class _HomescreenState extends State<Homescreen> {
     children: [
     RefreshIndicator(
     onRefresh: _refreshData,
-      child: Column(
-        children: [
-          // 🔄 On Duty / Off Duty Toggle Switch
+      child:Column(
+          children: [
+      // 🔄 On Duty / Off Duty Toggle Switch
+      Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              "Duty Status",
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            ),
+            // Use Flexible or Expanded instead of SizedBox + double.infinity
+            // Flexible(
+            //
+            //   child: SwitchListTile(
+            //     title: Text(isOnDuty ? "On Duty" : "Off Duty"),
+            //     value: isOnDuty,
+            //     onChanged: (value) async {
+            //       setState(() => isOnDuty = value);
+            //       await toggleFloatingService(value);
+            //     },
+            //     contentPadding: EdgeInsets.zero,
+            //   ),
+            //
+            // ),
+            Flexible(
+              child: SwitchListTile(
+                title: Text(isOnDuty ? "On Duty" : "Off Duty"),
+                value: isOnDuty,
+                onChanged: (value) async {
+                  setState(() => isOnDuty = value);
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.setBool('isOnDuty', value);
+                  await toggleFloatingService(value);
+                },
 
-          Padding(
+                contentPadding: EdgeInsets.zero,
 
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-
-            child: Row(
-
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-
-              children: [
-
-                const Text(
-
-                  "Duty Status",
-
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-
-                ),
-
-                // Use Flexible or Expanded instead of SizedBox + double.infinity
-
-                Flexible(
-
-                  child: SwitchListTile(
-
-                    title: Text(isOnDuty ? "On Duty" : "Off Duty"),
-
-                    value: isOnDuty,
-
-                    onChanged: (value) async {
-
-                      setState(() => isOnDuty = value);
-
-                      await toggleFloatingService(value);
-
-                    },
-
-                    contentPadding: EdgeInsets.zero,
-
-                  ),
-
-                ),
-
-              ],
+              ),
 
             ),
+          ],
 
-          ),
-          Expanded(child:
-          BlocBuilder<TripSheetValuesBloc, TripSheetValuesState>(
-            builder: (context, state) {
-              if (state is FetchingTripSheetValuesLoading) {
-                return const Center(child: CircularProgressIndicator());
-              } else if (state is FetchingTripSheetValuesLoaded) {
-                if (state.tripSheetData.isEmpty) {
-                  return ListView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    children: const [
-                      SizedBox(height: 300),
-                      Center(child: Text('No trip sheet data found.')),
-                    ],
-                  );
-                } else {
-                  // return ListView.builder(
-                  //   physics: const AlwaysScrollableScrollPhysics(),
-                  //   itemCount: state.tripSheetData.length,
-                  //   itemBuilder: (context, index) {
-                  //     final trip = state.tripSheetData[index];
-                  //     return buildSection(
-                  //       context,
-                  //       title: '${trip['duty']}',
-                  //       dateTime: '${trip['tripid']}',
-                  //       buttonText: '${trip['apps']}',
-                  //       // onTap: () {
-                  //       //   Navigator.push(
-                  //       //     context,
-                  //       //     MaterialPageRoute(
-                  //       //       builder: (context) => Bookingdetails(
-                  //       //         username: widget.username,
-                  //       //         userId: widget.userId,
-                  //       //         tripId: trip['tripid'].toString(),
-                  //       //         duty: trip['duty'].toString(),
-                  //       //       ),
-                  //       //     ),
-                  //       //   );
-                  //       // },
-                  //       onTap: () {
-                  //         if (trip['apps'] == 'On_Going') {
-                  //           Navigator.push(
-                  //             context,
-                  //             MaterialPageRoute(
-                  //               builder: (context) => Customerlocationreached(tripId: trip['tripid'].toString()),
-                  //             ),
-                  //           );
-                  //         } else {
-                  //           Navigator.push(
-                  //             context,
-                  //             MaterialPageRoute(
-                  //               builder: (context) => Bookingdetails(
-                  //                 username: widget.username,
-                  //                 userId: widget.userId,
-                  //                 tripId: trip['tripid'].toString(),
-                  //                 duty: trip['duty'].toString(),
-                  //               ),
-                  //             ),
-                  //           );
-                  //         }
-                  //       },
-                  //
-                  //     );
-                  //   },
-                  // );
+        ),
 
-
-                  return ListView.builder(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    itemCount: state.tripSheetData.length,
-                    itemBuilder: (context, index) {
-                      final trip = state.tripSheetData[index];
-
-                      // Check if the current item is the first one
-                      final isFirstItem = (index == 0);
-
-                      return buildSection(
-                        context,
-                        title: '${trip['duty']}',
-                        dateTime: '${trip['tripid']}',
-                        buttonText: '${trip['apps']}',
-                        isEnabled: isFirstItem,  // Pass enabled status
-
-                        onTap: isFirstItem
-                            ? () {
-                          if (trip['apps'] == 'On_Going') {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => Customerlocationreached(
-                                    tripId: trip['tripid'].toString()),
-                              ),
-                            );
-                          } else {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => Bookingdetails(
-                                  username: widget.username,
-                                  userId: widget.userId,
-                                  tripId: trip['tripid'].toString(),
-                                  duty: trip['duty'].toString(),
-                                ),
-                              ),
-                            );
-                          }
-                        }
-                            : null,  // Disable onTap if not the first item
-                      );
-                    },
-                  );
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                }
-              }
-              return const SizedBox(); // Fallback empty widget
-            },
-          ),)
-        ],
       ),
+
+Expanded(child:
+
+      BlocBuilder<TripSheetValuesBloc, TripSheetValuesState>(
+        builder: (context, state) {
+          if (state is FetchingTripSheetValuesLoading) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (state is FetchingTripSheetValuesLoaded) {
+            if (state.tripSheetData.isEmpty) {
+              return ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                children: const [
+                  SizedBox(height: 300),
+                  Center(child: Text('No trip sheet data found.')),
+                ],
+              );
+            } else {
+              // return ListView.builder(
+              //   physics: const AlwaysScrollableScrollPhysics(),
+              //   itemCount: state.tripSheetData.length,
+              //   itemBuilder: (context, index) {
+              //     final trip = state.tripSheetData[index];
+              //     return buildSection(
+              //       context,
+              //       title: '${trip['duty']}',
+              //       dateTime: '${trip['tripid']}',
+              //       buttonText: '${trip['apps']}',
+              //       // onTap: () {
+              //       //   Navigator.push(
+              //       //     context,
+              //       //     MaterialPageRoute(
+              //       //       builder: (context) => Bookingdetails(
+              //       //         username: widget.username,
+              //       //         userId: widget.userId,
+              //       //         tripId: trip['tripid'].toString(),
+              //       //         duty: trip['duty'].toString(),
+              //       //       ),
+              //       //     ),
+              //       //   );
+              //       // },
+              //       onTap: () {
+              //         if (trip['apps'] == 'On_Going') {
+              //           Navigator.push(
+              //             context,
+              //             MaterialPageRoute(
+              //               builder: (context) => Customerlocationreached(tripId: trip['tripid'].toString()),
+              //             ),
+              //           );
+              //         } else {
+              //           Navigator.push(
+              //             context,
+              //             MaterialPageRoute(
+              //               builder: (context) => Bookingdetails(
+              //                 username: widget.username,
+              //                 userId: widget.userId,
+              //                 tripId: trip['tripid'].toString(),
+              //                 duty: trip['duty'].toString(),
+              //               ),
+              //             ),
+              //           );
+              //         }
+              //       },
+              //
+              //     );
+              //   },
+              // );
+
+
+              return ListView.builder(
+                physics: const AlwaysScrollableScrollPhysics(),
+                itemCount: state.tripSheetData.length,
+                itemBuilder: (context, index) {
+                  final trip = state.tripSheetData[index];
+
+                  // Check if the current item is the first one
+                  final isFirstItem = (index == 0);
+
+                  return buildSection(
+                    context,
+                    title: '${trip['duty']}',
+                    dateTime: '${trip['tripid']}',
+                    buttonText: '${trip['apps']}',
+                    isEnabled: isFirstItem,  // Pass enabled status
+
+                    onTap: isFirstItem
+                        ? () {
+                      if (trip['apps'] == 'On_Going') {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => Customerlocationreached(
+                                tripId: trip['tripid'].toString()),
+                          ),
+                        );
+                      } else {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => Bookingdetails(
+                              username: widget.username,
+                              userId: widget.userId,
+                              tripId: trip['tripid'].toString(),
+                              duty: trip['duty'].toString(),
+                            ),
+                          ),
+                        );
+                      }
+                    }
+                        : null,  // Disable onTap if not the first item
+                  );
+                },
+              );
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            }
+          }
+          return const SizedBox(); // Fallback empty widget
+        },
+      ),
+
+      )
+  ]),
     ),
 
     Positioned(
@@ -1555,6 +1529,6 @@ class _HomescreenState extends State<Homescreen> {
     ],
     ),
 
-    );
+    ),);
   }
 }

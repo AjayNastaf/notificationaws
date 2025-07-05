@@ -867,6 +867,7 @@ class OtpEvent {
   final String guestName;
   final String senderEmail;
   final String senderPass;
+  final String tripId;
 
   OtpEvent({
     required this.guestNumber,
@@ -874,6 +875,7 @@ class OtpEvent {
     required this.guestName,
     required this.senderEmail,
     required this.senderPass,
+    required this.tripId,
   });
 }
 //sending otp events completed
@@ -888,9 +890,14 @@ class OtpVerifyEvent{
   final String guestName;
   final String senderEmail;
   final String senderPass;
+  final String tripId;
 
   OtpVerifyEvent(
-      {required this.guestNumber, required this.guestEmail, required this.guestName, required this.senderEmail, required this.senderPass});
+      {required this.guestNumber, required this.guestEmail, required this.guestName, required this.senderEmail,
+        required this.senderPass,
+        required this.tripId
+
+      });
 
 }
 //verify otp events completed
@@ -979,8 +986,9 @@ class SignupRequested extends SignupEvent {
   final String name;
   final String email;
   final String phone;
+  final String vechiNo;
 
-  SignupRequested({ required this.name, required this.email, required this.phone});
+  SignupRequested({ required this.name, required this.email, required this.phone, required this.vechiNo});
 }
 
 class OtpverificationRequested extends SignupEvent {

@@ -43,6 +43,7 @@ class MyBackgroundService : Service() {
     private var backgroundTimer: Timer? = null
     private lateinit var channel: MethodChannel
     private val CHANNEL_NAME = "com.example.jessy_cabs/tracking"
+    private var isBubbleAdded = false
 
     companion object {
         var isTrackingEnabled: Boolean = false
@@ -149,7 +150,7 @@ class MyBackgroundService : Service() {
     }
 
     private fun saveLocationToBackend(lat: Double, lon: Double) {
-            Log.i("BackgroundDebug", "📡 saveLocationToBackend triggered with: lat=$lat, lon=$lon")
+            Log.i("BackgroundDebug", "📡saveLocationToBackend triggered with: lat=$lat, lon=$lon")
         Log.d("BackgroundDebug", "🔍 Preparing to send location data:")
         Log.d("BackgroundDebug", "latitude = $lat")
         Log.d("BackgroundDebug", "longitude = $lon")
@@ -195,7 +196,7 @@ class MyBackgroundService : Service() {
 
     Thread {
             try {
-//                val url = URL("https://jessycabs.com:7128/addvehiclelocationUniqueLatlong")
+//                val url = URL("http://192.168.0.105:3006/addvehiclelocationUniqueLatlong")
                 val url = URL("http://52.91.161.155:7128/addvehiclelocationUniqueLatlong")
 //                val url = URL("http://75.101.215.49:7128/addvehiclelocationUniqueLatlong")
 
@@ -301,6 +302,11 @@ class MyBackgroundService : Service() {
 
     private fun showFloatingBubble() {
         try {
+
+            if (isBubbleAdded) {
+                Log.i("MyBackgroundService", "🔁 Bubble already added, skipping")
+                return
+            }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this)) {
                 Log.w("MyBackgroundService", "Missing overlay permission")
                 return
@@ -327,6 +333,8 @@ class MyBackgroundService : Service() {
 
             floatingView.setOnTouchListener(FloatingOnTouchListener(params))
             windowManager.addView(floatingView, params)
+            isBubbleAdded = true  // ✅ Set flag true
+
         } catch (e: Exception) {
             Log.e("MyBackgroundService", "Error showing floating bubble: ${e.localizedMessage}")
         }
@@ -366,11 +374,28 @@ class MyBackgroundService : Service() {
         }
     }
 
+//    override fun onDestroy() {
+//        super.onDestroy()
+//        try {
+//            locationTimer?.cancel()
+//            if (::floatingView.isInitialized) windowManager.removeView(floatingView)
+//        } catch (e: Exception) {
+//            Log.e("MyBackgroundService", "Destroy error: $e")
+//        }
+//
+//        backgroundTimer?.cancel()
+//        backgroundTimer = null
+//        Log.i("TimerService", "⛔ Timer stopped")
+//    }
+
     override fun onDestroy() {
         super.onDestroy()
         try {
             locationTimer?.cancel()
-            if (::floatingView.isInitialized) windowManager.removeView(floatingView)
+            if (::floatingView.isInitialized && isBubbleAdded) {
+                windowManager.removeView(floatingView)
+                isBubbleAdded = false  // ✅ Reset flag
+            }
         } catch (e: Exception) {
             Log.e("MyBackgroundService", "Destroy error: $e")
         }
@@ -379,6 +404,7 @@ class MyBackgroundService : Service() {
         backgroundTimer = null
         Log.i("TimerService", "⛔ Timer stopped")
     }
+
 
     override fun onBind(intent: Intent?): IBinder? = null
 }

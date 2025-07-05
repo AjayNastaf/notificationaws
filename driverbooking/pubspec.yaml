@@ -74,7 +74,6 @@ dependencies:
   android_intent_plus: ^4.0.1
 
 
-
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
 
@@ -124,6 +123,7 @@ flutter:
     - assets/animations/Animationtrack.json
     - assets/animations/otpverify.json
     - assets/animations/Animationss.json
+    - assets/animations/Animationing.json
 
   #    - assets/image/bg-Main.png
 

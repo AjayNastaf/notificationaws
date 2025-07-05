@@ -448,10 +448,19 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
+    // WidgetsBinding.instance.addPostFrameCallback((_) async {
+    //   requestPermissions(); // Request permissions before starting the service
+    //   BackgroundServiceHelper.startBackgroundService();
+    //   startBackgroundService();
+    //
+    // });
+
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       requestPermissions(); // Request permissions before starting the service
       BackgroundServiceHelper.startBackgroundService();
+
       startBackgroundService();
+
 
     });
   }
@@ -669,36 +678,56 @@ void requestPermissions() async {
   }
 }
 
+
+
 class BackgroundServiceHelper {
   static const MethodChannel _channel = MethodChannel("com.example.jessy_cabs/background");
   static const MethodChannel _notificationChannel = MethodChannel("com.example.jessy_cabs/notification");
-  static Future<void> startBackgroundService() async {
-    try {
-      final result = await _channel.invokeMethod("startService");
-      print("Background service result: $result");
-    } on PlatformException catch (e) {
-      print("Error starting background service: ${e.message}");
-    }
-  }
-}
 
+  static Future<void> startBackgroundService() async {
+
+    try {
+
+      final result = await _channel.invokeMethod("startService");
+
+      print("Background service result: $result");
+
+    } on PlatformException catch (e) {
+
+      print("Error starting background service: ${e.message}");
+
+    }
+
+  }
+
+}
 
 
 const platform = MethodChannel('com.example.jessy_cabs/background');
-
 Future<void> startBackgroundService() async {
   try {
     await platform.invokeMethod('startBackgroundService');
+
   } catch (e) {
+
     print("Error starting service: $e");
+
   }
+
 }
+
+
 
 Future<void> stopBackgroundService() async {
-  try {
-    await platform.invokeMethod('stopBackgroundService');
-  } catch (e) {
-    print("Error stopping service: $e");
-  }
-}
 
+  try {
+
+    await platform.invokeMethod('stopBackgroundService');
+
+  } catch (e) {
+
+    print("Error stopping service: $e");
+
+  }
+
+}

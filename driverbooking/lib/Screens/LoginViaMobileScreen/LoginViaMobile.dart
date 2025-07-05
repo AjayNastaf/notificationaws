@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:jessy_cabs/Utils/AllImports.dart';
 import 'package:lottie/lottie.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 import '../HomeScreen/HomeScreen.dart';
 
 class Loginviamobile extends StatefulWidget {
@@ -85,7 +85,7 @@ class _LoginviamobileState extends State<Loginviamobile> with SingleTickerProvid
       body: MultiBlocListener(
         listeners: [
           BlocListener<LoginViaBloc, LoginViaState>(
-            listener: (context, state) {
+            listener: (context, state) async {
               if (state is LoginViaOtpSentForSignup) {
                 setState(() {
                   changeState = false;
@@ -93,6 +93,23 @@ class _LoginviamobileState extends State<Loginviamobile> with SingleTickerProvid
                   name = state.name;
                   print('username received in LoginViaPage${name}');
                 });
+
+
+                // Dispatch event to another Bloc
+                BlocProvider.of<TripSheetValuesBloc>(context).add(
+                  FetchTripSheetValues(
+                    userid: '',
+                    drivername: name!,
+                  ),
+                );
+                print("➡️ TripSheetValuesBloc event dispatched");
+
+                // Save to SharedPreferences
+                if (name != null) {
+                  SharedPreferences pref = await SharedPreferences.getInstance();
+                  await pref.setString('username', name!);
+                }
+
                 _startOtpTimer();
               } else if (state is LoginViaSuccess) {
                 setState(() {
@@ -289,7 +306,7 @@ class _LoginviamobileState extends State<Loginviamobile> with SingleTickerProvid
                                 ),
                               ),
                               child: ElevatedButton(
-                                onPressed: () {
+                                onPressed: () async {
                                   if (changeState) {
                                     if (_formKey.currentState!.validate()) {
                                       number = _phoneController.text;
@@ -311,12 +328,14 @@ class _LoginviamobileState extends State<Loginviamobile> with SingleTickerProvid
                                       );
                                       return;
                                     }
-                                    if(enteredOtp == otp){
+                                    if(enteredOtp == otp) {
+                                      SharedPreferences pref = await SharedPreferences.getInstance();
+                                      await pref.setString('username', name!);
+
+                                      print('i saved in localstrong from loginviaotp page');
                                       Navigator.push(context, MaterialPageRoute(
                                         builder: (context)=>Homescreen(userId: "", username: name!)));
-                                       ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text("OTP Verification Success")),
-                                      );
+
                                       return;
                                     }
                                   }

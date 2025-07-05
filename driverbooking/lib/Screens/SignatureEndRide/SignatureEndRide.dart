@@ -297,7 +297,8 @@ print("${e}");
         });
 
         if(hybridata == '1'){
-          context.read<LastOtBloc>().add(OtpVerifyEvent(guestNumber: guestMobileNumber, guestEmail: guestEmail, guestName: guestName, senderEmail: senderEmail!, senderPass: senderPass!,));
+          context.read<LastOtBloc>().add(OtpVerifyEvent(guestNumber: guestMobileNumber, guestEmail: guestEmail, guestName: guestName, senderEmail: senderEmail!, senderPass: senderPass!, tripId: widget.tripId));
+
         }
 
         // Dispatch first API call

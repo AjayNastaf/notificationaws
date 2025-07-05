@@ -138,6 +138,7 @@ router.get('/TemplateForDriverCreation', async (req, res) => {
 
 
 
+
 router.post('/send-email1', async (req, res) => {
 console.log('fffffffffffffffffffffffffffffffffffffffffffffffffff')
     try {
@@ -166,12 +167,21 @@ console.log('fffffffffffffffffffffffffffffffffffffffffffffffffff')
             const customerMailOptions1 = {
                 from:`${Sender_Mail}`,
                 to: `${email}`,
-                subject: `JESSY CABS PVT LTD BOOKING CONFIRMATION FOR ${guestname} `,
+                subject: `JESSY CABS PVT LTD TRIP LOG FOR ${guestname} `,
                 html: `
 
 <div style="margin:0; padding:0; font-family: 'Segoe UI', sans-serif; background-color: #f4f4f4;">
 
   <div style="max-width: 700px; margin: 30px auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+
+     <div style="margin-top: 10px; padding: 15px;">
+          <div style="text-align: center; font-size: 20px; margin-bottom: 2px;">
+            <p style="margin: 0;"><b>Your Trusted Travel Partner</b></p>
+          </div>
+          <div style="text-align: justify; font-size: 14px; color: #333; margin-top: 10px;"> <!-- reduced margin -->
+            <p style="margin: 0;"><em>We are assuring 100% transparency in delivering excellence.</em></p> <!-- removed margin-top -->
+          </div>
+        </div>
 
     <!-- HEADER -->
     <div style="display: flex; background: linear-gradient(90deg, #203f7d, #4c68d7); color: white;">
@@ -187,10 +197,10 @@ console.log('fffffffffffffffffffffffffffffffffffffffffffffffffff')
     </div>
 
     <!-- TRIP DETAILS -->
-    <div style="padding: 30px;">
+    <div style="padding: 15px;">
       <h2 style="color: #333; font-size: 20px; margin-bottom: 20px;">Trip Summary</h2>
 
-      <div style=" padding:20px;">
+      <div style=" padding:10px;">
         <div style="min-width: 200px;max-width: 700px; margin-Top:15px; background: #f1f1f1; padding: 15px; border-radius: 8px;">
           <strong>Trip No:</strong><br> ${TripId}
         </div>
@@ -259,6 +269,17 @@ console.log('fffffffffffffffffffffffffffffffffffffffffffffffffff')
             </div>
           </div>
         </div>
+
+<div style="margin-top:10px; padding: 15px;">
+
+  <div style="text-align: justify; font-size: 14px; color: #333; margin-top:10px;">
+    <p>We request you to confirm the above details. In case of any discrepancies, please let us know within 24 hours. If no response is received within this period, the mentioned details will be considered as approved for billing.</p>
+    <p>We are glad to provide our services to you and look forward to your next ride with us.</p>
+  </div>
+
+</div>
+
+
       </div>
 
       <!-- FOOTER -->
@@ -272,7 +293,6 @@ console.log('fffffffffffffffffffffffffffffffffffffffffffffffffff')
           📧 booking@jessycabs.in<br>
           🌐 <a href="https://www.jessycabs.in" style="color: #2575fc; text-decoration: none;">www.jessycabs.in</a>
         </p>
-      </div>
     </div>
   </div>
 
@@ -294,6 +314,7 @@ console.log(customerMailOptions1, "iopoi")
         res.status(500).json({ message: 'An error occurred while sending the email' });
     }
 });
+
 
 
 

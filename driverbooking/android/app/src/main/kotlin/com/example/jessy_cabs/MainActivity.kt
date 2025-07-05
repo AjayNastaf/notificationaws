@@ -373,6 +373,8 @@ import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.embedding.engine.FlutterEngineCache
 import io.flutter.plugin.common.MethodChannel
 import android.util.Log
+import android.app.ActivityManager
+
 
 class MainActivity : FlutterActivity(), LifecycleEventObserver {
 
@@ -582,14 +584,43 @@ class MainActivity : FlutterActivity(), LifecycleEventObserver {
         context.stopService(intent)
     }
 
+
+
+    private fun isFloatingServiceRunning(context: Context): Boolean {
+        val manager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        for (service in manager.getRunningServices(Int.MAX_VALUE)) {
+            if (FloatingService::class.java.name == service.service.className) {
+                return true
+            }
+        }
+        return false
+    }
+
+
     private fun startFloatingService(context: Context) {
-        val intent = Intent(context, FloatingService::class.java)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            context.startForegroundService(intent)
-        } else {
-            context.startService(intent)
+        if (!isFloatingServiceRunning(context)) {
+            val intent = Intent(context, FloatingService::class.java)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                context.startForegroundService(intent)
+            } else {
+                context.startService(intent)
+            }
         }
     }
+
+
+
+
+
+
+//    private fun startFloatingService(context: Context) {
+//        val intent = Intent(context, FloatingService::class.java)
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//            context.startForegroundService(intent)
+//        } else {
+//            context.startService(intent)
+//        }
+//    }
 
     private fun stopFloatingService(context: Context) {
         val intent = Intent(context, FloatingService::class.java)

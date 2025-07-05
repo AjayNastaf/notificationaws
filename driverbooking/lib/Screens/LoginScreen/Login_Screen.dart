@@ -21,6 +21,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:jessy_cabs/Screens/LoginViaMobileScreen/LoginViaMobile.dart';
 import 'package:jessy_cabs/Screens/SignUpScreen/SignUp_Screen.dart';
 
+import '../FirstScreen/FirstScreen.dart';
+
 class Login_Screen extends StatefulWidget {
   const Login_Screen({super.key});
 
@@ -115,14 +117,16 @@ class _Login_ScreenState extends State<Login_Screen> {
     return BlocProvider(
         create: (_) => LoginBloc(),
         child: Scaffold(
+          backgroundColor: Colors.white,
           appBar: AppBar(
-            automaticallyImplyLeading: false,  // Removes the back button
-
-              // title: Text("Login"),
-              // actions: [
-              //   IconButton(onPressed: (){}, icon: Icon(Icons.logout,))
-              // ],
-              ),
+            automaticallyImplyLeading: false,
+            backgroundColor: Colors.white,
+            leading:IconButton(
+                onPressed: (){
+                  Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>FirstScreen()), (route)=>false);
+                },
+                icon: Icon(Icons.arrow_back_rounded)) ,
+          ),
           body: BlocListener<LoginBloc, LoginState>(listener: (context, state) {
             if (state is LoginCompleted) {
               // ScaffoldMessenger.of(context).showSnackBar(

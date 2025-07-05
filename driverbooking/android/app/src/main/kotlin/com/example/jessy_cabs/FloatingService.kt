@@ -323,10 +323,14 @@ class FloatingService : Service() {
     private val notificationId = 1234
     private val channelId = "floating_service_channel"
 
+    private var isViewAdded = false
+
+
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onCreate() {
         super.onCreate()
+
         createNotificationChannel()
         startFloatingNotification()
         setupFloatingWindow()
@@ -359,7 +363,41 @@ class FloatingService : Service() {
         }
     }
 
+//    private fun setupFloatingWindow() {
+//        windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
+//        floatingView = LayoutInflater.from(this).inflate(R.layout.layout_floating_widget, null)
+//
+//        val params = WindowManager.LayoutParams(
+//            WindowManager.LayoutParams.WRAP_CONTENT,
+//            WindowManager.LayoutParams.WRAP_CONTENT,
+//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+//                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+//            else
+//                WindowManager.LayoutParams.TYPE_PHONE,
+//            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+//            PixelFormat.TRANSLUCENT
+//        )
+//
+//        params.gravity = Gravity.TOP or Gravity.START
+//        params.x = 0
+//        params.y = 100
+//
+//        floatingView.setOnTouchListener(FloatingTouchListener(params))
+//        windowManager.addView(floatingView, params)
+//
+//        floatingView.setOnClickListener {
+//            val launchIntent = Intent(applicationContext, MainActivity::class.java).apply {
+//                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+//                putExtra("fromFloatingIcon", true)
+//            }
+//            startActivity(launchIntent)
+//        }
+//    }
+
+
     private fun setupFloatingWindow() {
+        if (isViewAdded) return  // Prevent adding multiple views
+
         windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
         floatingView = LayoutInflater.from(this).inflate(R.layout.layout_floating_widget, null)
 
@@ -379,7 +417,13 @@ class FloatingService : Service() {
         params.y = 100
 
         floatingView.setOnTouchListener(FloatingTouchListener(params))
-        windowManager.addView(floatingView, params)
+
+        try {
+            windowManager.addView(floatingView, params)
+            isViewAdded = true
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
 
         floatingView.setOnClickListener {
             val launchIntent = Intent(applicationContext, MainActivity::class.java).apply {
@@ -389,6 +433,7 @@ class FloatingService : Service() {
             startActivity(launchIntent)
         }
     }
+
 
     inner class FloatingTouchListener(private val params: WindowManager.LayoutParams) : View.OnTouchListener {
         private var initialX = 0
@@ -420,10 +465,27 @@ class FloatingService : Service() {
         }
     }
 
+//    override fun onDestroy() {
+//        super.onDestroy()
+//        if (::windowManager.isInitialized && ::floatingView.isInitialized) {
+//            windowManager.removeView(floatingView)
+//        }
+//    }
+
     override fun onDestroy() {
         super.onDestroy()
-        if (::windowManager.isInitialized && ::floatingView.isInitialized) {
-            windowManager.removeView(floatingView)
+        try {
+            if (::floatingView.isInitialized && floatingView.isAttachedToWindow) {
+                windowManager.removeView(floatingView)
+                isViewAdded = false
+
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
+
     }
 }
+
+
+

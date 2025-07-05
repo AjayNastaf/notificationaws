@@ -1317,9 +1317,6 @@ import 'package:flutter/services.dart';
 import '../../NativeTracker.dart';
 
 
-
-
-
 class SharedPrefs {
   static Future<void> setBool(String key, bool value) async {
     final prefs = await SharedPreferences.getInstance();
@@ -1384,6 +1381,8 @@ class _TrackingPageState extends State<TrackingPage> {
     super.initState();
     _initializeLocationTracking();
     print("InitSate Work in TrackingPage");
+    NativeTracker.startTracking();
+
 
     context.read<SenderInfoBloc>().add(FetchSenderInfo());
     _getLatLngFromAddress(widget.address);
@@ -1413,8 +1412,6 @@ class _TrackingPageState extends State<TrackingPage> {
     _checkMapLoading();
     dropLocations = globals.dropLocation;
     performAnotherFunction();
-    NativeTracker.startTracking();
-
 
     saveScreenData();
 
@@ -1846,7 +1843,7 @@ class _TrackingPageState extends State<TrackingPage> {
           longitude: longitude,
           vehicleNo: vehicleNumber,
           tripId: widget.tripId,
-          //tripStatus: tripStatus,
+          // tripStatus: tripStatus,
           tripStatus: 'Accept',
           reached_30minutes: "null",
 
@@ -2088,13 +2085,7 @@ class _TrackingPageState extends State<TrackingPage> {
       try {
         print('i will trigger OTP');
 
-        // context.read<OtpBloc>().add(OtpEvent(
-        //   guestNumber: guestMobileNumber.toString(),
-        //   guestEmail: guestEmail.toString(),
-        //   guestName: guestName.toString(),
-        //   senderEmail: senderEmail!,
-        //   senderPass: senderPass!,
-        // ));
+
 
         if (senderEmail != null && senderPass != null) {
           context.read<OtpBloc>().add(OtpEvent(
@@ -2103,6 +2094,7 @@ class _TrackingPageState extends State<TrackingPage> {
             guestName: guestName.toString(),
             senderEmail: senderEmail!,
             senderPass: senderPass!,
+            tripId: widget.tripId,
           ));
         } else {
           // You can show a warning or fallback
@@ -2159,7 +2151,7 @@ class _TrackingPageState extends State<TrackingPage> {
                 // ScaffoldMessenger.of(context).showSnackBar(
                 //   SnackBar(content: Text("Location saved successfully!")),
                 // );
-                // showSuccessSnackBar(context, "Location saved successfully! $tripStatus");
+                showSuccessSnackBar(context, "Location saved successfully! $tripStatus");
               } else if (state is SaveLocationFailure) {
                 // ScaffoldMessenger.of(context).showSnackBar(
                 //   SnackBar(content: Text(state.errorMessage)),
@@ -2367,10 +2359,7 @@ class _TrackingPageState extends State<TrackingPage> {
 
 
 
-            child: SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              child: Container(
-                  height: MediaQuery.of(context).size.height,
+
                   child: Stack(
 
                     children: [
@@ -2378,7 +2367,8 @@ class _TrackingPageState extends State<TrackingPage> {
                       // if (!_isMapLoading && _currentLatLng != null)
 
                       if (_isLocationInitialized  && _currentLatLng != null)
-
+                        SizedBox.expand(
+                          child:
                         GoogleMap(
 
                           initialCameraPosition: CameraPosition(
@@ -2457,7 +2447,7 @@ class _TrackingPageState extends State<TrackingPage> {
 
                           myLocationButtonEnabled: false,
 
-                        ),
+                        ),),
 
 
 
@@ -2479,108 +2469,108 @@ class _TrackingPageState extends State<TrackingPage> {
 
                         ),
 
-                      Positioned(
-
-                        bottom: 0,
-
-                        left: 0,
-
-                        right: 0,
-
-                        child: IgnorePointer(
-
-                          ignoring: false,
-
-                          child: Container(
-
-                            height: 150,
-
-                            padding: EdgeInsets.all(16),
-
-                            color: Colors.white,
-
-
-
-                            child: Column(
-
-                              mainAxisSize: MainAxisSize.min,
-
-                              children: [
-
-                                // Text('Current Trip Status:  $tripStatus',style: TextStyle(fontSize: 20.0,),),
-
-
-                                // Text(
-                                //
-                                //   ' currentLatLng: $_currentLatLng',
-                                //
-                                //   style: TextStyle(fontSize: 20.0, ),
-                                //
-                                // ),
-
-                                SizedBox(height: 40),
-
-                                // SizedBox(
-                                //
-                                //   width: double.infinity,
-                                //
-                                //   child:
-                                //
-                                //   ElevatedButton(
-                                //
-                                //     // onPressed: _handleStartRideButton,
-                                //     onPressed: _isLoading ? null : _handleStartRideButton,
-                                //
-                                //     style: ElevatedButton.styleFrom(
-                                //
-                                //       backgroundColor: AppTheme.Navblue1,
-                                //
-                                //       padding: EdgeInsets.symmetric(vertical: 16),
-                                //
-                                //       shape: RoundedRectangleBorder(
-                                //
-                                //         borderRadius: BorderRadius.circular(8),
-                                //
-                                //       ),
-                                //
-                                //     ),
-                                //
-                                //
-                                //
-                                //     child:  _isLoading
-                                //         ? SizedBox(
-                                //       height: 20,
-                                //       width: 20,
-                                //       child: CircularProgressIndicator(
-                                //         color: Colors.white,
-                                //         strokeWidth: 2,
-                                //       ),
-                                //     )
-                                //         : Text(
-                                //
-                                //       'Start Ride',
-                                //
-                                //       style: TextStyle(
-                                //
-                                //           fontSize: 20.0, color: Colors.white),
-                                //
-                                //     ),
-                                //
-                                //   ),
-                                //
-                                //
-                                //
-                                // ),
-
-                              ],
-
-                            ),
-
-                          ),
-
-                        ),
-
-                      ),
+                      // Positioned(
+                      //
+                      //   bottom: 0,
+                      //
+                      //   left: 0,
+                      //
+                      //   right: 0,
+                      //
+                      //   child: IgnorePointer(
+                      //
+                      //     ignoring: false,
+                      //
+                      //     child: Container(
+                      //
+                      //       height: 150,
+                      //
+                      //       padding: EdgeInsets.all(16),
+                      //
+                      //       color: Colors.white,
+                      //
+                      //
+                      //
+                      //       child: Column(
+                      //
+                      //         mainAxisSize: MainAxisSize.min,
+                      //
+                      //         children: [
+                      //
+                      //           // Text('Current Trip Status:  $tripStatus',style: TextStyle(fontSize: 20.0,),),
+                      //
+                      //
+                      //           // Text(
+                      //           //
+                      //           //   ' currentLatLng: $_currentLatLng',
+                      //           //
+                      //           //   style: TextStyle(fontSize: 20.0, ),
+                      //           //
+                      //           // ),
+                      //
+                      //           SizedBox(height: 40),
+                      //
+                      //           // SizedBox(
+                      //           //
+                      //           //   width: double.infinity,
+                      //           //
+                      //           //   child:
+                      //           //
+                      //           //   ElevatedButton(
+                      //           //
+                      //           //     // onPressed: _handleStartRideButton,
+                      //           //     onPressed: _isLoading ? null : _handleStartRideButton,
+                      //           //
+                      //           //     style: ElevatedButton.styleFrom(
+                      //           //
+                      //           //       backgroundColor: AppTheme.Navblue1,
+                      //           //
+                      //           //       padding: EdgeInsets.symmetric(vertical: 16),
+                      //           //
+                      //           //       shape: RoundedRectangleBorder(
+                      //           //
+                      //           //         borderRadius: BorderRadius.circular(8),
+                      //           //
+                      //           //       ),
+                      //           //
+                      //           //     ),
+                      //           //
+                      //           //
+                      //           //
+                      //           //     child:  _isLoading
+                      //           //         ? SizedBox(
+                      //           //       height: 20,
+                      //           //       width: 20,
+                      //           //       child: CircularProgressIndicator(
+                      //           //         color: Colors.white,
+                      //           //         strokeWidth: 2,
+                      //           //       ),
+                      //           //     )
+                      //           //         : Text(
+                      //           //
+                      //           //       'Start Ride',
+                      //           //
+                      //           //       style: TextStyle(
+                      //           //
+                      //           //           fontSize: 20.0, color: Colors.white),
+                      //           //
+                      //           //     ),
+                      //           //
+                      //           //   ),
+                      //           //
+                      //           //
+                      //           //
+                      //           // ),
+                      //
+                      //         ],
+                      //
+                      //       ),
+                      //
+                      //     ),
+                      //
+                      //   ),
+                      //
+                      // ),
 
                       Positioned(
 
@@ -2597,9 +2587,7 @@ class _TrackingPageState extends State<TrackingPage> {
                     ],
 
                   )
-              ),
 
-            ),
 
           ),
           bottomNavigationBar: BottomAppBar(

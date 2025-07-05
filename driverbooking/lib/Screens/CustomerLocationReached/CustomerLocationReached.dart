@@ -956,9 +956,9 @@ import 'package:geocoding/geocoding.dart' as geocoding;
 import 'package:location/location.dart' as loc;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/services.dart';
 import 'package:jessy_cabs/Utils/AllImports.dart';
 import '../../NativeTracker.dart';
+
 
 class Customerlocationreached extends StatefulWidget {
   final String tripId;
@@ -1037,20 +1037,18 @@ String? TripStartTime;
   Timer? _saveOkayTimer;
 
   double _initialDistance = 0.0;
-
   // static const platform = MethodChannel('com.example.jessy_cabs/tracking');
 
   static const MethodChannel _channel =
-
   MethodChannel('com.example.jessy_cabs/tracking');
-
   static const MethodChannel _distancechannel = MethodChannel('com.example.jessy_cabs/background');
+
 
   static const MethodChannel _trackingChannel = MethodChannel('com.example.jessy_cabs/tracking');
 
+  // double totalDistanceInKm = 0.0;
 
 
-  double totalDistanceInKm = 0.0;
 
   @override
   void initState() {
@@ -1058,7 +1056,6 @@ String? TripStartTime;
     _setDestinationFromDropLocation(); // Initialize properly
     _initializeCustomerLocationTracking();
     NativeTracker.startTracking();
-
 
     context.read<TripTrackingDetailsBloc>().add(
         FetchTripTrackingDetails(widget.tripId));
@@ -1068,93 +1065,13 @@ String? TripStartTime;
     _startTimer();
 
     saveScreenData();
-
     startOtpResendTimer();
-
     context.read<GetOkayBloc>().add(FetchOkaymessage(trip_id: widget.tripId));
     _loadTripSheetDetailsByTripId();
-
-    loadSavedDistance();       // Load pref on screen open
-
-    listenToDistanceUpdates();
+    // loadSavedDistance();
   }
 
 
-
-
-  Future<void> loadSavedDistance() async {
-
-    try {
-
-      final savedDistance = await _trackingChannel.invokeMethod("getSavedDistance");
-
-      setState(() {
-
-        totalDistanceInKm = (savedDistance as num?)?.toDouble() ?? 0.0;
-
-        totalDistanceInKm /= 1000; // convert meters to kilometers
-
-      });
-
-      print('✅ Distance loaded from native: $totalDistanceInKm km');
-
-    } catch (e) {
-
-      print('❌ Error loading distance: $e');
-
-    }
-
-  }
-
-
-
-
-
-  void listenToDistanceUpdates() {
-
-    _trackingChannel.setMethodCallHandler((call) async {
-
-      if (call.method == 'locationUpdate') {
-
-        final Map<dynamic, dynamic> data = call.arguments;
-
-        final totalMeters = (data['totalDistance'] as num?)?.toDouble() ?? 0.0;
-
-
-
-        setState(() {
-
-          totalDistanceInKm = totalMeters / 1000;
-
-        });
-
-
-
-        print("📡 Live update: $totalDistanceInKm km");
-
-      }
-
-    });
-
-  }
-
-
-
-
-
-  Future<void> clearSavedDistance() async {
-    try {
-      await _trackingChannel.invokeMethod("clearSavedDistance");
-
-      print("✅ SharedPreferences cleared");
-
-      setState(() {
-        totalDistanceInKm = 0.0;
-      });
-    } catch (e) {
-      print("❌ Failed to clear distance: $e");
-    }
-  }
 
 
   Future<void> _loadTripSheetDetailsByTripId() async {
@@ -1196,7 +1113,35 @@ String? TripStartTime;
   }
 
 
-
+  // Future<void> loadSavedDistance() async {
+  //   try {
+  //     final savedDistance = await _trackingChannel.invokeMethod("getSavedDistance");
+  //     setState(() {
+  //       totalDistanceInKm = (savedDistance as num?)?.toDouble() ?? 0.0;
+  //       totalDistanceInKm /= 1000; // convert meters to kilometers
+  //     });
+  //
+  //     print('✅ Distance loaded from native: $totalDistanceInKm km');
+  //
+  //   } catch (e) {
+  //     print('❌ Error loading distance: $e');
+  //
+  //   }
+  //
+  // }
+  //
+  //
+  // Future<void> clearSavedDistance() async {
+  //   try {
+  //     await _trackingChannel.invokeMethod("clearSavedDistance");
+  //     print("✅ SharedPreferences cleared");
+  //     setState(() {
+  //       totalDistanceInKm = 0.0;
+  //     });
+  //   } catch (e) {
+  //     print("❌ Failed to clear distance: $e");
+  //   }
+  // }
 
   void startOtpResendTimer() {
     _otpResendTimer = Timer.periodic(Duration(seconds: 1), (timer) {
@@ -1430,80 +1375,7 @@ String? TripStartTime;
 
 
 //save lat long in bloc starts
-//   void saveLocationCustomer(double latitude, double longitude) async {
-//     final now = DateTime.now();
-//     final currentTimeStr = DateFormat("HH:mm:ss.SSS").format(now); // "15:43:21.123"
-//
-//     final currentTime = DateFormat("HH:mm:ss.SSS").parse(currentTimeStr);
-//     final updatedTime = DateFormat("HH:mm:ss.SSS").parse(GetupdatedTime);
-//
-//     print("Current Time: $currentTimeStr");
-//     print("Updated Time: $GetupdatedTime");
-//
-//     print("CurrentTime datatype: ${currentTime.runtimeType}");
-//     print("UpdatedTime datatype: ${updatedTime.runtimeType}");
-//
-//
-//     print("Inside saveLocation function");
-//     print("Vehicle Number: $vehicleNumber, Trip Status: $tripStatus");
-//     // Prevent saving if latitude and longitude are (0.0, 0.0)
-//     if (latitude == 0.0 && longitude == 0.0) {
-//       print("⚠ Invalidd location (0.0, 0.0) - Not saving to database.");
-//       return; // Stop execution
-//     }
-//
-//
-//     if (currentTime.isAfter(updatedTime) || currentTime.isAtSameMomentAs(updatedTime)) {
-//       if (vehicleNumber.isNotEmpty && tripStatus.isNotEmpty) {
-//         print("Dispatching SaveLocationToDatabase eevent with send okay message to Bloc");
-//
-//         context.read<TripTrackingDetailsBloc>().add(
-//           SaveLocationToDatabase(
-//             latitude: latitude,
-//             longitude: longitude,
-//             vehicleNo: vehicleNumber,
-//             tripId: widget.tripId,
-//             tripStatus: 'On_Going',
-//             reached_30minutes: "okay",
-//           ),
-//         );
-//
-//         print('i triggered okay message event dispath and delete the privious time ${currentTime}');
-//         SharedPreferences pref = await SharedPreferences.getInstance();
-//
-//         await pref.remove("updated_start_time");
-//
-//         // context.read<GetOkayBloc>().add(FetchOkaymessage(trip_id: widget.tripId));
-//
-//
-//
-//       }
-//     }  else {
-//
-//       if (vehicleNumber.isNotEmpty && tripStatus.isNotEmpty) {
-//         print("Dispatching SaveLocationToDatabase eevent... ${currentTime}");
-//
-//         context.read<TripTrackingDetailsBloc>().add(
-//           SaveLocationToDatabase(
-//             latitude: latitude,
-//             longitude: longitude,
-//             vehicleNo: vehicleNumber,
-//             tripId: widget.tripId,
-//             tripStatus: 'On_Going',
-//             reached_30minutes:"null",
-//           ),
-//         );
-//       } else {
-//         print("Trip details are not yet loaded. Cannot save location.");
-//       }
-//     }
-//
-//   }
-
-
-//save lat long in bloc starts
   void saveLocationCustomer(double latitude, double longitude) async {
-
     final now = DateTime.now();
     final currentTimeStr = DateFormat("HH:mm:ss.SSS").format(now); // "15:43:21.123"
 
@@ -1517,7 +1389,6 @@ String? TripStartTime;
     print("UpdatedTime datatype: ${updatedTime.runtimeType}");
 
 
-
     print("Inside saveLocation function");
     print("Vehicle Number: $vehicleNumber, Trip Status: $tripStatus");
     // Prevent saving if latitude and longitude are (0.0, 0.0)
@@ -1525,6 +1396,7 @@ String? TripStartTime;
       print("⚠ Invalidd location (0.0, 0.0) - Not saving to database.");
       return; // Stop execution
     }
+
 
     if (currentTime.isAfter(updatedTime) || currentTime.isAtSameMomentAs(updatedTime)) {
       if (vehicleNumber.isNotEmpty && tripStatus.isNotEmpty) {
@@ -1565,19 +1437,11 @@ String? TripStartTime;
             tripStatus: 'On_Going',
             reached_30minutes:"null",
           ),
-
-
         );
-
-        SharedPreferences pref = await SharedPreferences.getInstance();
-
-        await pref.remove("updated_start_time");
-
       } else {
         print("Trip details are not yet loaded. Cannot save location.");
       }
     }
-
 
   }
 //save lat long in bloc completed
@@ -1837,7 +1701,7 @@ String? TripStartTime;
   }
 
   Future<void> _endRide() async {
-    clearSavedDistance();
+    // clearSavedDistance();
 
 
     final String dateSignature = DateTime.now().toIso8601String().split('T')[0] + ' ' + DateTime.now().toIso8601String().split('T')[1].split('.')[0];
@@ -1959,21 +1823,11 @@ String? TripStartTime;
     }
   }
 
-
-
-
-
-
   Future<void> ForNumberAndIdInbackEndKT() async {
-
-
-
     await NativeTracker.setTrackingMetadata(tripId: widget.tripId, vehicleNumber: vehicleNumber);
+    await NativeTracker.startTracking();
+  }
 
-
-
-
-    await NativeTracker.startTracking();}
 
 
   @override
@@ -1992,13 +1846,14 @@ String? TripStartTime;
                   tripStatus = state.status;
                 });
                 ForNumberAndIdInbackEndKT();
+
+
                 SharedPreferences pref = await SharedPreferences.getInstance();
 
                 await pref.remove("updated_start_time");
 
                 print('i triggered for okay message inside of bloc listener');
                 context.read<GetOkayBloc>().add(FetchOkaymessage(trip_id: widget.tripId));
-
                 print("Trip details loaded. Vehicle: $vehicleNumber, Status: $tripStatus");
 
                 // Ensure trip details are set before calling saveLocation
@@ -2008,6 +1863,8 @@ String? TripStartTime;
                   print("Trip details are still empty after setting state.");
                 }
               } else if (state is SaveLocationSuccess) {
+        showSuccessSnackBar(context, "Location saved successfully! $tripStatus");
+
                 SharedPreferences pref = await SharedPreferences.getInstance();
 
 
@@ -2135,15 +1992,13 @@ String? TripStartTime;
                         borderRadius: BorderRadius.circular(8),
                         boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 5)],
                       ),
-                      child: Text(
-                        "Distance Traveled: ${_totalDistance.toStringAsFixed(2)} km \n"
-                            "Duration: ${_formatDuration(_duration)}\n"
-                        "Total Distance: ${totalDistanceInKm.toStringAsFixed(4)} km \n",
-
-
-
-                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-                      ),
+                      // child: Text(
+                      //   "Distance Traveled: ${_totalDistance.toStringAsFixed(2)} km \n"
+                      //       "Total Distance kt file: ${totalDistanceInKm.toStringAsFixed(4)} km \n",
+                      //       // "Duration: ${_formatDuration(_duration)}",
+                      //
+                      //   style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                      // ),
                     ),
                   ),
 

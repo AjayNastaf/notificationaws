@@ -2339,6 +2339,7 @@ class ApiService {
     required String name,
     required String senderEmail,
     required String senderPass,
+    required String tripId,
   }) async {
     final url = Uri.parse('${AppConstants.baseUrl}/send-otp');
 
@@ -2352,6 +2353,7 @@ class ApiService {
           'name':name,
           'senderEmail': senderEmail,
           'senderPass': senderPass,
+          'tripId': tripId,
 
         }),
       );
@@ -2377,6 +2379,7 @@ class ApiService {
     required String name,
     required String senderEmail,
     required String senderPass,
+    required String tripId,
 
   }) async {
     print('verifyOtp received to APi service${name}');
@@ -2393,6 +2396,7 @@ class ApiService {
           'name':name,
           'senderEmail': senderEmail,
           'senderPass': senderPass,
+          'tripId': tripId,
 
         }),
       );
@@ -2529,12 +2533,14 @@ class ApiService {
     required String name,
     required String email,
     required String phone,
+    required String vechiNo,
 
   }) async{
 
     print('first step values received in Api_Service ${email}');
     print('first step values received in Api_Service ${name}');
     print('first step values received in Api_Service ${phone}');
+    print('first step values received in Api_Service ${vechiNo}');
 
     String uri = "${AppConstants.baseUrl}/signup";
 
@@ -2547,6 +2553,7 @@ class ApiService {
             'name':name,
             'email':email,
             'phone':phone,
+            'vechiNo':vechiNo,
           })
       );
       print('first step response from backend in Api_Service ${response}');

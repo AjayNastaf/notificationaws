@@ -994,14 +994,14 @@ app.get('/getAllUploadsByTripId', (req, res) => {
 
 
 //local
-//  app.listen(3003, () => {
-//    console.log("Server started on port 30059");
-//  });
+// app.listen(3006, () => {
+//   console.log("Server started on port 3005");
+// });
 
 
 
 //jessycabs
 app.listen(7128, () => {
-console.log("Server started on port 7100000p0");
+ console.log("Server started on port 7100000p0");
 });
 

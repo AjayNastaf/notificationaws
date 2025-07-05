@@ -62,19 +62,30 @@ router.post('/login', (req, res) => {
 
 
 
+
+
 router.post("/signup", async (req, res) => {
   try {
-    const { name, email, phone } = req.body;
+    const { name, email = null, phone, vechiNo= "null" } = req.body;
 
-    console.log('first step phone number received', name, email, phone);
+       const now = new Date();
+
+       const formattedDate = now.getFullYear() +
+         '/' + String(now.getMonth() + 1).padStart(2, '0') +
+         '/' + String(now.getDate()).padStart(2, '0');
+
+       console.log('date format',formattedDate); // Example: "2025/06/23"
+
+    console.log('first step phone number received', name, email, phone, vechiNo);
 
     const otp = Math.floor(1000 + Math.random() * 9000).toString();
     const mobile = phone;
 
-    const selectQuery = 'SELECT * FROM drivercreation WHERE username = ?';
+//    const selectQuery = 'SELECT * FROM drivercreation WHERE username = ?';
+    const selectQuery = 'SELECT * FROM drivercreation WHERE Mobileno = ?';
     console.log(selectQuery,'ddddddddd');
 
-    db.query(selectQuery, [name], (selectErr, selectResult) => {
+    db.query(selectQuery, [phone], (selectErr, selectResult) => {
       if (selectErr) {
         console.error("Database select error:", selectErr);
         return res.status(500).json({ message: "Database error", success: false });
@@ -91,8 +102,8 @@ router.post("/signup", async (req, res) => {
         });
       }
 
-      const insertQuery = 'INSERT INTO drivercreation (username, Drivername, Email, Mobileno, driverhiretype) VALUES (?, ?, ?, ?, "Outside Driver")';
-      db.query(insertQuery, [name, name, email, phone], async (insertErr, insertResult) => {
+      const insertQuery = 'INSERT INTO drivercreation (username, Drivername, Email, Mobileno, driverhiretype, vehRegNo) VALUES (?, ?, ?, ?, "Outside Driver", ?)';
+      db.query(insertQuery, [name, name, email, phone, vechiNo], async (insertErr, insertResult) => {
         console.log('insert successfully');
 
         if (insertErr) {
@@ -145,7 +156,7 @@ Do not share this code with anyone.
             });
           }
 
-          const { MessageErrorCode, MessageErrorDescription } = smsData;
+    const { MessageErrorCode, MessageErrorDescription, MessageId } = smsData;
 
           if (MessageErrorCode !== 0) {
             return res.status(500).json({
@@ -157,29 +168,36 @@ Do not share this code with anyone.
 
           console.log('otp send from first');
           console.log('otp send from first', otp);
+          console.log("messageId", MessageId);
 
+        const insertQuery = `INSERT INTO smsreport (SmsMessageid, smsDate) VALUES (?, ?)`;
+
+       db.query(insertQuery, [MessageId, formattedDate], (err) => {
+                if(err){
+                return res.status(400).send({ message : "Server Error"});
+                }
+                    console.log("inserted messageId and Date");
           return res.status(200).json({
             message: "OTP sent successfully",
             otp,
             userId,
             success: true,
           });
-
+        })
         } catch (smsError) {
           console.log("SMS API error:", smsError);
           return res.status(500).json({ message: "Failed to send OTP", success: false });
         }
       });
-    });
-
-  } catch (error) {
-    console.error("Signup error:", error);
-    return res.status(500).json({
-      message: "Server Error",
-      success: false
-    });
-  }
-});
+       });
+     } catch (error) {
+       console.error("Signup error:", error);
+       return res.status(500).json({
+         message: "Server Error",
+         success: false
+       });
+     }
+   });
 
 
 router.post("/signup_again_otp", async (req, res) => {
