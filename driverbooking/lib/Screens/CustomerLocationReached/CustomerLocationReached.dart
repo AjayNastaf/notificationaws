@@ -1046,7 +1046,7 @@ String? TripStartTime;
 
   static const MethodChannel _trackingChannel = MethodChannel('com.example.jessy_cabs/tracking');
 
-  // double totalDistanceInKm = 0.0;
+  double totalDistanceInKm = 0.0;
 
 
 
@@ -1113,35 +1113,35 @@ String? TripStartTime;
   }
 
 
-  // Future<void> loadSavedDistance() async {
-  //   try {
-  //     final savedDistance = await _trackingChannel.invokeMethod("getSavedDistance");
-  //     setState(() {
-  //       totalDistanceInKm = (savedDistance as num?)?.toDouble() ?? 0.0;
-  //       totalDistanceInKm /= 1000; // convert meters to kilometers
-  //     });
-  //
-  //     print('✅ Distance loaded from native: $totalDistanceInKm km');
-  //
-  //   } catch (e) {
-  //     print('❌ Error loading distance: $e');
-  //
-  //   }
-  //
-  // }
-  //
-  //
-  // Future<void> clearSavedDistance() async {
-  //   try {
-  //     await _trackingChannel.invokeMethod("clearSavedDistance");
-  //     print("✅ SharedPreferences cleared");
-  //     setState(() {
-  //       totalDistanceInKm = 0.0;
-  //     });
-  //   } catch (e) {
-  //     print("❌ Failed to clear distance: $e");
-  //   }
-  // }
+  Future<void> loadSavedDistance() async {
+    try {
+      final savedDistance = await _trackingChannel.invokeMethod("getSavedDistance");
+      setState(() {
+        totalDistanceInKm = (savedDistance as num?)?.toDouble() ?? 0.0;
+        totalDistanceInKm /= 1000; // convert meters to kilometers
+      });
+
+      print('✅ Distance loaded from native: $totalDistanceInKm km');
+
+    } catch (e) {
+      print('❌ Error loading distance: $e');
+
+    }
+
+  }
+
+
+  Future<void> clearSavedDistance() async {
+    try {
+      await _trackingChannel.invokeMethod("clearSavedDistance");
+      print("✅ SharedPreferences cleared");
+      setState(() {
+        totalDistanceInKm = 0.0;
+      });
+    } catch (e) {
+      print("❌ Failed to clear distance: $e");
+    }
+  }
 
   void startOtpResendTimer() {
     _otpResendTimer = Timer.periodic(Duration(seconds: 1), (timer) {
@@ -1701,7 +1701,7 @@ String? TripStartTime;
   }
 
   Future<void> _endRide() async {
-    // clearSavedDistance();
+    clearSavedDistance();
 
 
     final String dateSignature = DateTime.now().toIso8601String().split('T')[0] + ' ' + DateTime.now().toIso8601String().split('T')[1].split('.')[0];
@@ -1992,13 +1992,13 @@ String? TripStartTime;
                         borderRadius: BorderRadius.circular(8),
                         boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 5)],
                       ),
-                      // child: Text(
-                      //   "Distance Traveled: ${_totalDistance.toStringAsFixed(2)} km \n"
-                      //       "Total Distance kt file: ${totalDistanceInKm.toStringAsFixed(4)} km \n",
-                      //       // "Duration: ${_formatDuration(_duration)}",
-                      //
-                      //   style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-                      // ),
+                      child: Text(
+                        // "Distance Traveled: ${_totalDistance.toStringAsFixed(2)} km \n"
+                            "Total Distance kt file: ${totalDistanceInKm.toStringAsFixed(4)} km ",
+                            // "Duration: ${_formatDuration(_duration)}",
+
+                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                      ),
                     ),
                   ),
 
