@@ -63,6 +63,9 @@ class MyBackgroundService : Service() {
     private val PREFS_NAME = "tracking_prefs"
     private val DISTANCE_KEY = "total_distance_m"
 
+    private lateinit var locationRequest: com.google.android.gms.location.LocationRequest
+    private lateinit var locationCallback: com.google.android.gms.location.LocationCallback
+
 
     override fun onCreate() {
         super.onCreate()
@@ -127,27 +130,56 @@ class MyBackgroundService : Service() {
         return START_STICKY
     }
 
-    private fun startLocationLoop() {
-        locationTimer = Timer()
-        locationTimer?.scheduleAtFixedRate(object : TimerTask() {
-            override fun run() {
-                if (!isTrackingEnabled) return
+//    private fun startLocationLoop() {
+//        locationTimer = Timer()
+//        locationTimer?.scheduleAtFixedRate(object : TimerTask() {
+//            override fun run() {
+//                if (!isTrackingEnabled) return
+//
+//                fusedLocationClient.lastLocation
+//                    .addOnSuccessListener { location ->
+//                        if (location != null) {
+//                            Log.d("LocationLoop", "Lat=${location.latitude}, Lon=${location.longitude}")
+//                            saveLocationToBackend(location.latitude, location.longitude)
+//                        } else {
+//                            Log.w("LocationLoop", "Location is null")
+//                        }
+//                    }
+//                    .addOnFailureListener {
+//                        Log.e("LocationLoop", "Failed to get location: ${it.localizedMessage}")
+//                    }
+//            }
+//        }, 0, 2000)
+//    }
 
-                fusedLocationClient.lastLocation
-                    .addOnSuccessListener { location ->
-                        if (location != null) {
-                            Log.d("LocationLoop", "Lat=${location.latitude}, Lon=${location.longitude}")
-                            saveLocationToBackend(location.latitude, location.longitude)
-                        } else {
-                            Log.w("LocationLoop", "Location is null")
-                        }
-                    }
-                    .addOnFailureListener {
-                        Log.e("LocationLoop", "Failed to get location: ${it.localizedMessage}")
-                    }
+    private fun startLocationLoop() {
+        locationRequest = com.google.android.gms.location.LocationRequest.Builder(
+            com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY,
+            2000L // 2 seconds
+        )
+            .setMinUpdateIntervalMillis(2000L)
+            .setMinUpdateDistanceMeters(0f)
+            .build()
+
+        locationCallback = object : com.google.android.gms.location.LocationCallback() {
+            override fun onLocationResult(result: com.google.android.gms.location.LocationResult) {
+                val location = result.lastLocation
+                if (location != null && isTrackingEnabled) {
+                    Log.d("LocationLoop", "📍 Lat=${location.latitude}, Lon=${location.longitude}")
+                    saveLocationToBackend(location.latitude, location.longitude)
+                } else {
+                    Log.w("LocationLoop", "⚠️ Location null or tracking disabled")
+                }
             }
-        }, 0, 5000)
+        }
+
+        fusedLocationClient.requestLocationUpdates(
+            locationRequest,
+            locationCallback,
+            Looper.getMainLooper()
+        )
     }
+
 
     private fun saveLocationToBackend(lat: Double, lon: Double) {
             Log.i("BackgroundDebug", "📡saveLocationToBackend triggered with: lat=$lat, lon=$lon")
@@ -198,7 +230,6 @@ class MyBackgroundService : Service() {
             try {
 //                val url = URL("http://192.168.0.105:3006/addvehiclelocationUniqueLatlong")
                 val url = URL("http://52.91.161.155:7128/addvehiclelocationUniqueLatlong")
-//                val url = URL("http://75.101.215.49:7128/addvehiclelocationUniqueLatlong")
 
                 val conn = url.openConnection() as HttpURLConnection
                 conn.requestMethod = "POST"
@@ -388,13 +419,32 @@ class MyBackgroundService : Service() {
 //        Log.i("TimerService", "⛔ Timer stopped")
 //    }
 
+//    override fun onDestroy() {
+//        super.onDestroy()
+//        try {
+//            locationTimer?.cancel()
+//            if (::floatingView.isInitialized && isBubbleAdded) {
+//                windowManager.removeView(floatingView)
+//                isBubbleAdded = false  // ✅ Reset flag
+//            }
+//        } catch (e: Exception) {
+//            Log.e("MyBackgroundService", "Destroy error: $e")
+//        }
+//
+//        backgroundTimer?.cancel()
+//        backgroundTimer = null
+//        Log.i("TimerService", "⛔ Timer stopped")
+//    }
+
+
     override fun onDestroy() {
         super.onDestroy()
         try {
+            fusedLocationClient.removeLocationUpdates(locationCallback) // ✅ Stop updates
             locationTimer?.cancel()
             if (::floatingView.isInitialized && isBubbleAdded) {
                 windowManager.removeView(floatingView)
-                isBubbleAdded = false  // ✅ Reset flag
+                isBubbleAdded = false
             }
         } catch (e: Exception) {
             Log.e("MyBackgroundService", "Destroy error: $e")
@@ -402,8 +452,9 @@ class MyBackgroundService : Service() {
 
         backgroundTimer?.cancel()
         backgroundTimer = null
-        Log.i("TimerService", "⛔ Timer stopped")
+        Log.i("TimerService", "⛔ Service destroyed, location updates stopped")
     }
+
 
 
     override fun onBind(intent: Intent?): IBinder? = null
