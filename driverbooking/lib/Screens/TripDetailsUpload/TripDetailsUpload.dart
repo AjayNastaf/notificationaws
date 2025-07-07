@@ -310,7 +310,7 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
       final savedDistance = await _trackingChannel.invokeMethod("getSavedDistance");
       setState(() {
         totalDistanceInKm = (savedDistance as num?)?.toDouble() ?? 0.0;
-        totalDistanceInKm /= 1000; // convert meters to kilometers
+        // totalDistanceInKm /= 1000; // convert meters to kilometers
         roundedDistance = totalDistanceInKm.round(); // 🔁 Save for other functions
 
       });

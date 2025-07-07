@@ -121,7 +121,7 @@ class MyBackgroundService : Service() {
             channel = MethodChannel(engine.dartExecutor.binaryMessenger, CHANNEL_NAME)
             channel.setMethodCallHandler { call, result ->
                 when (call.method) {
-                    "getTotalDistance" -> result.success(totalDistanceInMeters)
+                    "getTotalDistance" -> result.success(totalDistanceInMeters / 1000.0)
                     else -> result.notImplemented()
                 }
             }
@@ -280,10 +280,11 @@ class MyBackgroundService : Service() {
         val locationMap = mapOf(
             "lat" to lat,
             "lon" to lon,
-            "distance" to distance,
-            "totalDistance" to totalDistanceInMeters
+//            "distance" to distance,
+//            "totalDistance" to totalDistanceInMeters
+            "distance" to distance / 1000.0, // Convert to kilometers
+            "totalDistance" to totalDistanceInMeters / 1000.0 // Convert to kilometers
         )
-
         channel.invokeMethod("locationUpdate", locationMap)
     }
 
