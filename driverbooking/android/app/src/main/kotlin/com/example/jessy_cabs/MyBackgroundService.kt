@@ -70,6 +70,8 @@ class MyBackgroundService : Service() {
     override fun onCreate() {
         super.onCreate()
         Log.d("MyBackgroundService", "Service created")
+        Log.i("MyBackgroundService", "🔥 onCreate called")
+
         createNotificationChannel()
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 //        val engine = FlutterEngine(this)
@@ -228,7 +230,7 @@ class MyBackgroundService : Service() {
 
     Thread {
             try {
-//                val url = URL("http://192.168.0.105:3006/addvehiclelocationUniqueLatlong")
+//                val url = URL("http://192.168.0.103:3007/addvehiclelocationUniqueLatlong")
                 val url = URL("http://52.91.161.155:7128/addvehiclelocationUniqueLatlong")
 
                 val conn = url.openConnection() as HttpURLConnection

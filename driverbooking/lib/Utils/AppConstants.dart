@@ -20,7 +20,7 @@ class AppConstants {
 
 
   //local
-  // static const String baseUrl = "http://192.168.0.105:3006";
+  // static const String baseUrl = "http://192.168.0.103:3007";
   // static const String baseUrl = "https://192.168.1.145:7128";
 
 
@@ -30,7 +30,6 @@ class AppConstants {
 
 
   static const String baseUrl = "http://52.91.161.155:7128";
-  // static const String baseUrl = "http://192.168.0.105:3006";
 
 
 
