@@ -75,7 +75,7 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
   static const MethodChannel _trackingChannel = MethodChannel('com.example.jessy_cabs/tracking');
 
   double totalDistanceInKm = 0.0;
-  int roundedDistance = 0;        // Add this
+  double roundedDistance = 0.0;
 
 
 
@@ -123,7 +123,6 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
         });
       });
     }
-    _fetchTripDetails();
     loadSavedDistance();
 
   }
@@ -310,12 +309,9 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
       final savedDistance = await _trackingChannel.invokeMethod("getSavedDistance");
       setState(() {
         totalDistanceInKm = (savedDistance as num?)?.toDouble() ?? 0.0;
-        // totalDistanceInKm /= 1000; // convert meters to kilometers
-        roundedDistance = totalDistanceInKm.round(); // 🔁 Save for other functions
-
+        totalDistanceInKm /= 1000; // convert meters to kilometers
       });
-      print('✅ Distance loaded from native: $totalDistanceInKm km');
-      print('📏 Rounded distance to use: $roundedDistance km');
+
       print('✅ Distance loaded from native: $totalDistanceInKm km');
 
     } catch (e) {
@@ -324,8 +320,11 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
     }
 
   }
+
+
   Future<void> _StartCloseKm() async {
-    // print('Rounded Trip Distance: $roundedDistance');
+    // int roundedDistance = globals.savedTripDistance.round();
+    int roundedDistance = totalDistanceInKm.round();
     // int roundedDistance = 13;
     print('Rounded Trip Distance: $roundedDistance');
 
@@ -343,28 +342,6 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
       print('startkmvalue is not available.');
     }
   }
-
-
-
-  // Future<void> _StartCloseKm() async {
-  //   int roundedDistance = globals.savedTripDistance.round();
-  //   // int roundedDistance = 13;
-  //   print('Rounded Trip Distance: $roundedDistance');
-  //
-  //   if (startkmvalue != null) {
-  //     // Use startkmvalue as needed
-  //     print('Using startkmvalue in another function: $startkmvalue');
-  //
-  //     int startKmInt = int.parse(startkmvalue!); // Convert string to int
-  //     int totalDistance = startKmInt + roundedDistance;
-  //     print('Total Distance (start + rounded): $totalDistance');
-  //     closeKmController.text = totalDistance.toString();
-  //
-  //     // closeKmController = TextEditingController(text: totalDistance.toString());
-  //   } else {
-  //     print('startkmvalue is not available.');
-  //   }
-  // }
 
   Future<void> clearSavedDistance() async {
     try {

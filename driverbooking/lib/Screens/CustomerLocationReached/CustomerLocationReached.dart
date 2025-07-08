@@ -1118,7 +1118,7 @@ String? TripStartTime;
       final savedDistance = await _trackingChannel.invokeMethod("getSavedDistance");
       setState(() {
         totalDistanceInKm = (savedDistance as num?)?.toDouble() ?? 0.0;
-        totalDistanceInKm /= 1000; // convert meters to kilometers
+        // totalDistanceInKm /= 1000; // convert meters to kilometers
       });
 
       print('✅ Distance loaded from native: $totalDistanceInKm km');
@@ -1132,15 +1132,15 @@ String? TripStartTime;
 
 
   Future<void> clearSavedDistance() async {
-    try {
-      await _trackingChannel.invokeMethod("clearSavedDistance");
-      print("✅ SharedPreferences cleared");
-      setState(() {
-        totalDistanceInKm = 0.0;
-      });
-    } catch (e) {
-      print("❌ Failed to clear distance: $e");
-    }
+    // try {
+    //   await _trackingChannel.invokeMethod("clearSavedDistance");
+    //   print("✅ SharedPreferences cleared");
+    //   setState(() {
+    //     totalDistanceInKm = 0.0;
+    //   });
+    // } catch (e) {
+    //   print("❌ Failed to clear distance: $e");
+    // }
   }
 
   void startOtpResendTimer() {
@@ -2044,6 +2044,16 @@ String? TripStartTime;
                                         child: Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
+
+                                            Text(
+                                              'Current Location : ${totalDistanceInKm.toString()}',
+                                              style: TextStyle(
+                                                color: Colors.grey.shade800,
+                                                fontSize: 20.0,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                            SizedBox(height: 32),
                                             Text(
                                               'Current Location',
                                               style: TextStyle(

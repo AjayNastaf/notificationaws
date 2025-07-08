@@ -122,6 +122,7 @@ class MyBackgroundService : Service() {
             channel.setMethodCallHandler { call, result ->
                 when (call.method) {
                     "getTotalDistance" -> result.success(totalDistanceInMeters / 1000.0)
+//                    "getTotalDistance" -> result.success(totalDistanceInMeters)
                     else -> result.notImplemented()
                 }
             }
@@ -230,7 +231,7 @@ class MyBackgroundService : Service() {
 
     Thread {
             try {
-//                val url = URL("http://192.168.0.103:3007/addvehiclelocationUniqueLatlong")
+//                val url = URL("http://192.168.0.103:3008/addvehiclelocationUniqueLatlong")
                 val url = URL("http://52.91.161.155:7128/addvehiclelocationUniqueLatlong")
 
                 val conn = url.openConnection() as HttpURLConnection
