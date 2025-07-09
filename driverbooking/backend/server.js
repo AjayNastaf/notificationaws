@@ -1007,6 +1007,6 @@ app.get('/getAllUploadsByTripId', (req, res) => {
 
 
 //new server
-app.listen(,7263 () => {
+app.listen(7263, () => {
  console.log("Server started on port 7100000p0");
 });
