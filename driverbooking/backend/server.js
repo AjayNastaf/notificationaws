@@ -1001,7 +1001,12 @@ app.get('/getAllUploadsByTripId', (req, res) => {
 
 
 //jessycabs
-app.listen(7128, () => {
+//app.listen(7128, () => {
+// console.log("Server started on port 7100000p0");
+//});
+
+
+//new server
+app.listen(,7263 () => {
  console.log("Server started on port 7100000p0");
 });
-
