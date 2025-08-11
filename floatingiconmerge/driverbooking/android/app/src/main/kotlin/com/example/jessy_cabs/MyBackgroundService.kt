@@ -1171,7 +1171,7 @@ class MyBackgroundService : Service() {
                     Log.i("inside try", "✅ Location successfully sent. Response code: ")
 
 
-                    val url = URL("http://52.91.161.155:7128/addvehiclelocationUniqueLatlong")
+                    val url = URL("http://202.83.45.234:7128/addvehiclelocationUniqueLatlong")
 
                     val conn = url.openConnection() as HttpURLConnection
                     conn.requestMethod = "POST"
@@ -1224,7 +1224,7 @@ class MyBackgroundService : Service() {
 
 
 //                    val url = URL("https://jessycabs.com:7128/addvehiclelocationUniqueLatlong")
-                    val url = URL("http://52.91.161.155:7128/addvehiclelocationUniqueLatlong")
+                    val url = URL("http://202.83.45.234:7128/addvehiclelocationUniqueLatlong")
 
                     val conn = url.openConnection() as HttpURLConnection
                     conn.requestMethod = "POST"

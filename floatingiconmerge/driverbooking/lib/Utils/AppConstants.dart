@@ -27,7 +27,7 @@ class AppConstants {
 
   //jessycabs
   // static const String baseUrl = "https://jessycabs.com:7128";
-  static const String baseUrl = "http://52.91.161.155:7128";
+  static const String baseUrl = "http://202.83.45.234:7128";
 
 
 

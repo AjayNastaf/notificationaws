@@ -219,7 +219,7 @@ function addMinutesToTimeStrPure(timeStr, minutesToAdd) {
 
 
 const currentTime = Tripstarttime;                // From frontend
-const addedTime = addMinutesToTimeStrPure(result[0].Tripstarttime, 3); // +3 min from DB
+const addedTime = addMinutesToTimeStrPure(result[0].Tripstarttime, 10); // +3 min from DB
 
 console.log("Current Time:", currentTime);
 console.log("Last + 3min Time:", addedTime);
