@@ -1,2 +1,0 @@
-C:/mergingnotficationontheworkingcode/fullworkingcode/NASTAF-Driver-Application/driverbooking/android/app/.cxx/RelWithDebInfo/g5u6r4q6/x86_64/CMakeFiles/edit_cache.dir
-C:/mergingnotficationontheworkingcode/fullworkingcode/NASTAF-Driver-Application/driverbooking/android/app/.cxx/RelWithDebInfo/g5u6r4q6/x86_64/CMakeFiles/rebuild_cache.dir
