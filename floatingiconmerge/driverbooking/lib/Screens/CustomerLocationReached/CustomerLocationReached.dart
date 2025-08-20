@@ -1437,13 +1437,13 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> with 
 
       // Ensure vehicleNumber and tripStatus are available before calling saveLocation
       // if (vehicleNumber.isNotEmpty && tripStatus.isNotEmpty && tripStatus=='On_Going') {
-      if (vehicleNumber.isNotEmpty && tripStatus.isNotEmpty ) {
-        print('values present');
-        saveLocationCustomer(latitude, longitude);
-
-      } else {
-        print("⚠ Trip details not loaded yet, wwwaiting...");
-      }
+      // if (vehicleNumber.isNotEmpty && tripStatus.isNotEmpty ) {
+      //   print('values present');
+      //   saveLocationCustomer(latitude, longitude);
+      //
+      // } else {
+      //   print("⚠ Trip details not loaded yet, wwwaiting...");
+      // }
 
 
 
@@ -1924,11 +1924,11 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> with 
                 print("Trip details loaded. Vehicle: $vehicleNumber, Status: $tripStatus");
 
                 // Ensure trip details are set before calling saveLocation
-                if (vehicleNumber.isNotEmpty && tripStatus.isNotEmpty && tripStatus == 'On_Going') {
-                  saveLocationCustomer(0.0 , 0.0); // Example coordinates
-                } else {
-                  print("Trip details are still empty after setting state.");
-                }
+                // if (vehicleNumber.isNotEmpty && tripStatus.isNotEmpty && tripStatus == 'On_Going') {
+                //   saveLocationCustomer(0.0 , 0.0); // Example coordinates
+                // } else {
+                //   print("Trip details are still empty after setting state.");
+                // }
               } else if (state is SaveLocationSuccess) {
         // showSuccessSnackBar(context, "Location saved successfully! $tripStatus");
 

@@ -982,8 +982,8 @@ class MyBackgroundService : Service() {
                 2000L
             )
                 .setMinUpdateIntervalMillis(2000L)
-//                .setMinUpdateDistanceMeters(10f) // ✅ Set to 0 meters
-                .setMinUpdateDistanceMeters(0f) // ✅ Set to 0 meters
+                .setMinUpdateDistanceMeters(10f) // ✅ Set to 0 meters
+//                .setMinUpdateDistanceMeters(0f) // ✅ Set to 0 meters
                 .setGranularity(Granularity.GRANULARITY_FINE) // ✅ Ensure this is added
                 .setWaitForAccurateLocation(false)
                 .setMaxUpdateDelayMillis(10000L) // Optional batching
