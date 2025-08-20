@@ -345,6 +345,9 @@
 
 
 package com.example.jessy_cabs
+
+import android.content.pm.PackageManager
+
 import android.Manifest
 import android.content.Context
 import android.content.Intent
@@ -490,10 +493,28 @@ class MainActivity : FlutterActivity(), LifecycleEventObserver {
 
                     // ✅ NEW METHOD
 
-//                    "requestIgnoreBatteryOptimizations" -> {
-//                        requestBatteryOptimization()
-//                        result.success("Battery optimization request triggered")
-//                    }
+                    "openLocationPermissionSettings" -> {
+                        openLocationPermissionSettings()
+                        result.success("Opened location settings")
+                    }
+
+                    "hasBackgroundLocationPermission" -> {
+                        val hasPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                            ContextCompat.checkSelfPermission(
+                                this,
+                                Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                            ) == PackageManager.PERMISSION_GRANTED
+                        } else {
+                            // On Android 9 and below, ACCESS_FINE_LOCATION implies background
+                            ContextCompat.checkSelfPermission(
+                                this,
+                                Manifest.permission.ACCESS_FINE_LOCATION
+                            ) == PackageManager.PERMISSION_GRANTED
+                        }
+                        result.success(hasPermission)
+                    }
+
+
 
 
 
@@ -589,10 +610,10 @@ class MainActivity : FlutterActivity(), LifecycleEventObserver {
 //            requestOverlayPermission()
 //        }
 
-//        askIgnoreBatteryOptimizationIfNeeded()
+        askIgnoreBatteryOptimizationIfNeeded()
 
-        askIgnoreBatteryOptimization()
-        showManufacturerGuidance(this)
+//        askIgnoreBatteryOptimization()
+//        showManufacturerGuidance(this)
 
 
 //        requestIgnoreBatteryOptimization()  // ✅ Automatically request battery optimization exclusion
@@ -627,6 +648,9 @@ class MainActivity : FlutterActivity(), LifecycleEventObserver {
             else -> {}
         }
     }
+
+
+
 
     private fun requestPermissionsIfNeeded() {
         val permissions = mutableListOf(
@@ -801,7 +825,7 @@ class MainActivity : FlutterActivity(), LifecycleEventObserver {
                             "2. Enable 'Auto-start' and 'Allow Background Activity'\n\n" +
                             "Click OK to open settings."
                 )
-                .setPositiveButton("OK") { _, _ ->
+                .setPositiveButton("OKkk") { _, _ ->
                     openAppDetailsSettings(context)
                 }
                 .setNegativeButton("Cancel", null)
@@ -866,6 +890,15 @@ class MainActivity : FlutterActivity(), LifecycleEventObserver {
 
 
 
+
+
+
+    private fun openLocationPermissionSettings() {
+        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+            data = Uri.parse("package:$packageName")
+        }
+        startActivity(intent)
+    }
 
 
 

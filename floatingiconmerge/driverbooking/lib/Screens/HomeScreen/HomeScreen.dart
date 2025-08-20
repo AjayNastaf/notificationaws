@@ -300,6 +300,7 @@ import 'package:jessy_cabs/Bloc/App_Bloc.dart';
 import 'package:jessy_cabs/Bloc/AppBloc_Events.dart';
 import 'package:jessy_cabs/Screens/BookingDetails/BookingDetails.dart';
 import 'package:jessy_cabs/Screens/CustomerLocationReached/CustomerLocationReached.dart';
+import 'package:jessy_cabs/Screens/CustomerReachedWithouthcl/CustomerReachedWithouthcl.dart';
 import 'package:jessy_cabs/Screens/LoginScreen/Login_Screen.dart';
 import 'package:jessy_cabs/Screens/MenuListScreens/Contacts/ContactScreen.dart';
 import 'package:jessy_cabs/Screens/MenuListScreens/Faq/FaqScreen.dart';
@@ -1580,13 +1581,14 @@ class _HomescreenState extends State<Homescreen> {
                     title: '${trip['duty']}',
                     dateTime: '${trip['tripid']}',
                     buttonText: '${trip['apps']}',
+                    // buttonText: '${trip['Hybriddata']}',
                     // isEnabled: isFirstItem,  // Pass enabled status
                     isEnabled: isItemEnabled,  // Pass enabled status
 
                     // onTap: isFirstItem
                     onTap: isItemEnabled
                         ? () {
-                      if (trip['apps'] == 'On_Going') {
+                      if ((trip['apps'] == 'On_Going' ) && (trip['Hybriddata'] == 1)) {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -1594,7 +1596,15 @@ class _HomescreenState extends State<Homescreen> {
                                 tripId: trip['tripid'].toString()),
                           ),
                         );
-                      } else {
+                      } else if ((trip['apps'] == 'On_Going' ) && (trip['Hybriddata'] == 0)) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => CustomerReachedWithouthcl(
+                                tripId: trip['tripid'].toString()),
+                          ),
+                        );
+                      }else {
                         Navigator.push(
                           context,
                           MaterialPageRoute(

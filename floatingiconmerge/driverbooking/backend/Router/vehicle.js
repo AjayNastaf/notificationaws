@@ -95,7 +95,7 @@ router.post("/addvehiclelocation", (req, res) => {
 router.post("/addvehiclelocationUniqueLatlong", (req, res) => {
     const { vehicleno, latitudeloc, longitutdeloc, Trip_id, Runing_Date, Runing_Time, Trip_Status, Tripstarttime, TripEndTime, created_at, reach_30minutes } = req.body;
 
-    console.log('vengy');
+//    console.log('vengy');
 
 if(reach_30minutes == 'okay'){
 console.log(reach_30minutes,'eeeeeeeeeee');
@@ -219,7 +219,7 @@ function addMinutesToTimeStrPure(timeStr, minutesToAdd) {
 
 
 const currentTime = Tripstarttime;                // From frontend
-const addedTime = addMinutesToTimeStrPure(result[0].Tripstarttime, 10); // +3 min from DB
+const addedTime = addMinutesToTimeStrPure(result[0].Tripstarttime, 30); // +3 min from DB
 
 console.log("Current Time:", currentTime);
 console.log("Last + 3min Time:", addedTime);
@@ -398,12 +398,14 @@ router.post('/insertReachedData', (req, res) => {
     console.log("📝 Request Body:", req.body);
     const { vehicleno, latitudeloc, longitutdeloc, Trip_id, Runing_Date, Runing_Time, Trip_Status, Tripstarttime, TripEndTime, created_at } = req.body;
 
-        console.log('vengy');
+//        console.log('vengy');
 
         // Query to check if the trip status is already 'Reached'
+        const Tripdata = Number(Trip_id); // 123
+        console.log(typeof(Trip_id),typeof(Tripdata))
         const sqlReachedQuery = "SELECT * FROM VehicleAccessLocation WHERE Trip_id = ? AND Trip_Status = 'Reached' AND reach_30minutes = 'okay'";
 
-        db.query(sqlReachedQuery, [Trip_id], (err, reachedresult) => {
+        db.query(sqlReachedQuery, [Tripdata], (err, reachedresult) => {
             if (err) {
                 console.log("Error checking trip status:", err);
                 return res.status(500).send({ message: "Database error while checking trip status." });

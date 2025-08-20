@@ -950,7 +950,9 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> with WidgetsBindi
                                   ),
                                 ),
                                 const SizedBox(width: 8),
-                                ElevatedButton(
+                                if(_selectedImage2 == null)...[
+
+                                  ElevatedButton(
                                   style: ElevatedButton.styleFrom(
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(8),
@@ -960,7 +962,7 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> with WidgetsBindi
                                   onPressed: () => _pickFile(ImageSource.camera),
 
                                   child: const Text("Upload Closing Kms"),
-                                ),
+                                ),]
                               ],
                             ),
                             // _selectedImage2 != null
@@ -980,13 +982,37 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> with WidgetsBindi
                                   padding: const EdgeInsets.all(8.0),
                                   child: Column(
                                     children: [
-                                      ClipRRect(
-                                        borderRadius: BorderRadius.circular(12),
-                                        child: Image.file(
-                                          _selectedImage2!,
-                                          height: 200,
-                                          width: double.infinity,
-                                          fit: BoxFit.cover,
+                                      SizedBox(
+                                        height: 200, // same as image height
+                                        width: double.infinity,
+                                        child: Stack(
+                                          children: [
+                                            ClipRRect(
+                                              borderRadius: BorderRadius.circular(12),
+                                              child: Image.file(
+                                                _selectedImage2!,
+                                                height: 200,
+                                                width: double.infinity,
+                                                fit: BoxFit.cover,
+                                              ),
+                                            ),
+                                            Positioned(
+                                              top: 0,
+                                              right: 0,
+                                              child: InkWell(
+                                                onTap: () {
+                                                  setState(() {
+                                                    _selectedImage2 = null;
+                                                  });
+                                                },
+                                                child: Icon(
+                                                  Icons.cancel_outlined, // same style
+                                                  color: Colors.red,
+                                                  size: 48,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ),
                                       SizedBox(height: 10),
@@ -1020,6 +1046,11 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> with WidgetsBindi
                                     ),
                                   ),
                                   onPressed: _isLoading ? null : () {
+
+                                    if(_selectedImage2 == null){
+                                      return showFailureSnackBar(context, "Please, Upload Closing Kilometer");
+                                    };
+
                                     setState(() {
                                       _isLoading = true;
                                     });

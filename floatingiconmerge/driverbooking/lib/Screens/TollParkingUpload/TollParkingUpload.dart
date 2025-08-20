@@ -485,13 +485,37 @@ class _TollParkingUploadState extends State<TollParkingUpload> with WidgetsBindi
                             padding: const EdgeInsets.all(8.0),
                             child: Column(
                               children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: Image.file(
-                                    file,  // Use individual file
-                                    height: 200,
-                                    width: 200,
-                                    fit: BoxFit.cover,
+                                SizedBox(
+                                  height: 200,
+                                  width: 300,
+                                  child: Stack(
+                                    children: [
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.circular(12),
+                                        child: Image.file(
+                                          file,
+                                          height: 200,
+                                          width: 300,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                      Positioned(
+                                        top: 0,
+                                        right: 0,
+                                        child: IconButton(
+                                          onPressed: () {
+                                            setState(() {
+                                              tollFiles.remove(file);
+                                            });
+                                          },
+                                          icon: Icon(
+                                            Icons.cancel_outlined,
+                                            color: Colors.red,
+                                            size: 32,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                                 SizedBox(height: 10),
@@ -602,13 +626,37 @@ class _TollParkingUploadState extends State<TollParkingUpload> with WidgetsBindi
                             padding: const EdgeInsets.all(8.0),
                             child: Column(
                               children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: Image.file(
-                                    file,  // Use individual file
-                                    height: 200,
-                                    width: 200,
-                                    fit: BoxFit.cover,
+                                SizedBox(
+                                  height: 200,
+                                  width: 300,
+                                  child: Stack(
+                                    children: [
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.circular(12),
+                                        child: Image.file(
+                                          file,
+                                          height: 200,
+                                          width: 300,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                      Positioned(
+                                        top: 0,
+                                        right: 0,
+                                        child: IconButton(
+                                          onPressed: () {
+                                            setState(() {
+                                              parkingFiles.remove(file);
+                                            });
+                                          },
+                                          icon: Icon(
+                                            Icons.cancel_outlined,
+                                            color: Colors.red,
+                                            size: 32,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                                 SizedBox(height: 10),

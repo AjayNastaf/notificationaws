@@ -347,6 +347,8 @@ class _PickupscreenState extends State<Pickupscreen> with WidgetsBindingObserver
                               SizedBox(height: 40),
                               Text(
                                 ' ${widget.address}',
+                                maxLines: 2, // show up to 3 lines
+                                overflow: TextOverflow.ellipsis,
                                 style: TextStyle(color: Colors.grey.shade800, fontSize: 14),
                               ),
                             ],

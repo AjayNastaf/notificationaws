@@ -982,6 +982,7 @@ class MyBackgroundService : Service() {
                 2000L
             )
                 .setMinUpdateIntervalMillis(2000L)
+//                .setMinUpdateDistanceMeters(10f) // ✅ Set to 0 meters
                 .setMinUpdateDistanceMeters(0f) // ✅ Set to 0 meters
                 .setGranularity(Granularity.GRANULARITY_FINE) // ✅ Ensure this is added
                 .setWaitForAccurateLocation(false)
@@ -1021,6 +1022,9 @@ class MyBackgroundService : Service() {
             Log.d("LocationLoop", "🔍 Fine: $fineGranted, Coarse: $coarseGranted, Background: $bgGranted")
 
             if (!fineGranted || !coarseGranted || !bgGranted) {
+                Handler(Looper.getMainLooper()).postDelayed({
+                    startLocationLoop()
+                }, 5000)
                 Log.e("LocationLoop", "🚫 One or more location permissions not granted")
                 return
             }
@@ -1171,7 +1175,8 @@ class MyBackgroundService : Service() {
                     Log.i("inside try", "✅ Location successfully sent. Response code: ")
 
 
-                    val url = URL("http://52.91.161.155:7128/addvehiclelocationUniqueLatlong")
+                    val url = URL("http://202.83.45.236:7128/addvehiclelocationUniqueLatlong")
+//                    val url = URL("https://jessycabs.com:7128/addvehiclelocationUniqueLatlong")
 
                     val conn = url.openConnection() as HttpURLConnection
                     conn.requestMethod = "POST"
@@ -1218,13 +1223,15 @@ class MyBackgroundService : Service() {
                     Log.e("BackgroundDebug", "API request failed: ${e.localizedMessage}")
                 }
             }
+
+
             locationExecutor.execute {
                 try {
                     Log.i("inside try", "✅ Location successfully sent. Response code: ")
 
 
 //                    val url = URL("https://jessycabs.com:7128/addvehiclelocationUniqueLatlong")
-                    val url = URL("http://52.91.161.155:7128/addvehiclelocationUniqueLatlong")
+                    val url = URL("http://202.83.45.236:7128/addvehiclelocationUniqueLatlong")
 
                     val conn = url.openConnection() as HttpURLConnection
                     conn.requestMethod = "POST"

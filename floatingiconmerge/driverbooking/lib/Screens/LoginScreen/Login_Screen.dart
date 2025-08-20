@@ -182,7 +182,7 @@ print("com.example.jessy_cabs/background is started through login");
               // ScaffoldMessenger.of(context).showSnackBar(
               //   SnackBar(content: Text("Login Successful! User ID: ${state.userId}")),
               // );
-              requestPermissions(); // Request permissions before starting the service
+              // requestPermissions(); // Request permissions before starting the service
 
               startBackgroundService();
               startServiceIfPermitted();

@@ -781,6 +781,17 @@ class _MyAppState extends State<MyApp> {
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+
+
+
+      bool granted = await hasBackgroundLocationPermission();
+
+      if (!granted) {
+        openLocationSettings();
+      }
+
+
+
       // requestPermissions(); // Request permissions before starting the service
       //
       // startBackgroundService();
@@ -1188,6 +1199,24 @@ void requestPermissions() async {
     // Handle the case when permissions are not granted
   }
 }
+ const platform = MethodChannel('com.example.jessy_cabs/background');
+
+Future<void> openLocationSettings() async {
+  try {
+    await platform.invokeMethod('openLocationPermissionSettings');
+  } catch (e) {
+    print("Error opening settings: $e");
+  }
+}
+Future<bool> hasBackgroundLocationPermission() async {
+  try {
+    final bool granted = await platform.invokeMethod('hasBackgroundLocationPermission');
+    return granted;
+  } catch (e) {
+    print("Error checking background location permission: $e");
+    return false;
+  }
+}
 
 // import 'package:permission_handler/permission_handler.dart';
 
@@ -1217,7 +1246,7 @@ class BackgroundServiceHelper {
 }
 
 
-const platform = MethodChannel('com.example.jessy_cabs/background');
+// const platform = MethodChannel('com.example.jessy_cabs/background');
 Future<void> startBackgroundService() async {
   try {
     await platform.invokeMethod('startBackgroundService');

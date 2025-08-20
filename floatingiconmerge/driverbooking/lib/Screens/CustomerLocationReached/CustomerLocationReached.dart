@@ -1000,7 +1000,7 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> with 
 // // for 5 minutes time
 
   bool _showOtpResendButton = false;
-  int _otpTimerCount = 3;
+  int _otpTimerCount = 300;
   late Timer _otpResendTimer;
 
   GoogleMapController? _mapController;
@@ -1495,7 +1495,7 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> with 
             vehicleNo: vehicleNumber,
             tripId: widget.tripId,
             tripStatus: 'On_Going',
-            reached_30minutes: "okay",
+            reached_30minutes: "null",
           ),
         );
 
@@ -2099,7 +2099,7 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> with 
                                     Icon(Icons.person_pin_circle, color: Colors.green, size: 30),
                                     Container(
                                       width: 2,
-                                      height: 30,
+                                      height: 50,
                                       color: Colors.grey.shade400,
                                     ),
                                     Icon(Icons.location_on, color: Colors.red, size: 30),
@@ -2111,6 +2111,7 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> with 
                                   child: Row(
                                     children: [
                                       Container(
+                                  child: Expanded(
                                         // width: MediaQuery.of(context).size.width * 0.5, // 70% of screen width
                                         child: Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -2124,14 +2125,15 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> with 
                                               ),
                                             ),
                                             SizedBox(height: 32),
-                                            Text(
-                                              // '$dropLocation',
-                                              Tripdestination ?? '',
-                                              style: TextStyle(
-                                                color: Colors.grey.shade800,
-                                                fontSize: 20.0,
+                                               Text(
+                                                // '$dropLocation',
+                                                Tripdestination ?? '',
+                                                maxLines: 2, // show up to 3 lines
+                                                overflow: TextOverflow.ellipsis,                                              style: TextStyle(
+                                                  color: Colors.grey.shade800,
+                                                  fontSize: 20.0,
+                                                ),
                                               ),
-                                            ),
                                             // Text(
                                             //   'Current status: $tripStatus',
                                             //   style: TextStyle(
@@ -2141,7 +2143,7 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> with 
                                             // ),
 
                                           ],
-                                        ),
+                                        ),),
                                       ),
 
                                       SizedBox(width: 30.0,),

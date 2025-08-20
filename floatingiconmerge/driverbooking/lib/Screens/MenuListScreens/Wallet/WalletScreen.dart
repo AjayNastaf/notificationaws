@@ -14,7 +14,7 @@ class _WalletscreenState extends State<Walletscreen> {
       appBar: AppBar(title: Text('Info'),),
       body: Center(
         child: Text(
-          "Current Apk version is 20 (30.07.2025),",
+          "Current Apk version is 22 (18.08.2025),",
           style: TextStyle(fontSize: 16),
         ),
       ),

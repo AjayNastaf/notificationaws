@@ -81,7 +81,6 @@ class _CustomerReachedWithouthclState extends State<CustomerReachedWithouthcl> {
 
     print('Drop Location: ${Tripdestination}');
 
-    print( 'sedfvgbhnjgggggggggggggggggg');
 
     _loadTripSheetDetailsByTripId();
     TripStatusManager().start(context, widget.tripId);
@@ -387,7 +386,7 @@ class _CustomerReachedWithouthclState extends State<CustomerReachedWithouthcl> {
     // ),
 
       bottomNavigationBar: BottomAppBar(
-        height: 245.0,
+        height: 265.0,
         color: Colors.white,
         elevation: 8.0,
         child: Padding(
@@ -433,11 +432,15 @@ class _CustomerReachedWithouthclState extends State<CustomerReachedWithouthcl> {
                 children: [
                   Icon(Icons.location_on, color: Colors.red, size: 30),
                   const SizedBox(width: 12),
-                  Text(
-                    desti,
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 14,
+                  Expanded(
+                    child: Text(
+                      desti,
+                      maxLines: 2, // show up to 3 lines
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 14,
+                      ),
                     ),
                   ),
                 ],

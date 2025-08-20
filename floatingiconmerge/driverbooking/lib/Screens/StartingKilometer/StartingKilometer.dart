@@ -207,6 +207,59 @@ class _StartingKilometerState extends State<StartingKilometer>  with WidgetsBind
 
   }
   // // Navigate to next screen
+//   Future<void> _goToNextScreen() async {
+//     print("object");
+//
+//     if (_selectedFile != null) {
+//       context.read<StartKmBloc>().add(
+//         UploadStartingKilometerImage(
+//           tripId: widget.tripId,
+//           startingKilometerImage: _selectedFile!,
+//         ),
+//       );
+//     } else {
+//       print("Error: No image selected");
+//     }
+//
+//     context.read<StartKmBloc>().add(
+//       SubmitStartingKilometerText(
+//         tripId: widget.tripId,
+//         startKm: _startKM.text,
+//         hclValue: hclhybriddata.toString(),
+//         dutyValue: duty ?? "",
+//       ),
+//     );
+//
+//
+//     if (hclhybriddata == 1) {
+// print('hybrid 1');
+//       Navigator.pushAndRemoveUntil(
+//
+//         context,
+//
+//         MaterialPageRoute(builder: (_) => TrackingPage(address: widget.address, tripId: widget.tripId)),
+//
+//             (route) => false,
+//
+//       );
+//       return;
+//
+//     }
+//
+//     else if(hclhybriddata == 0) {
+//       print('hybrid 0');
+//
+//       Navigator.pushAndRemoveUntil(
+//       context,
+//       MaterialPageRoute(
+//         builder: (context) =>
+//             TrackingWithOutHcl(address: widget.address, tripId: widget.tripId),
+//       ), (route) => false
+//   );
+//       return;
+//
+// }
+//   }
   Future<void> _goToNextScreen() async {
     print("object");
 
@@ -217,50 +270,47 @@ class _StartingKilometerState extends State<StartingKilometer>  with WidgetsBind
           startingKilometerImage: _selectedFile!,
         ),
       );
-    } else {
-      print("Error: No image selected");
-    }
-
-    context.read<StartKmBloc>().add(
-      SubmitStartingKilometerText(
-        tripId: widget.tripId,
-        startKm: _startKM.text,
-        hclValue: hclhybriddata.toString(),
-        dutyValue: duty ?? "",
-      ),
-    );
 
 
-    if (hclhybriddata == 1) {
-print('hybrid 1');
-      Navigator.pushAndRemoveUntil(
-
-        context,
-
-        MaterialPageRoute(builder: (_) => TrackingPage(address: widget.address, tripId: widget.tripId)),
-
-            (route) => false,
-
+      context.read<StartKmBloc>().add(
+        SubmitStartingKilometerText(
+          tripId: widget.tripId,
+          startKm: _startKM.text,
+          hclValue: hclhybriddata.toString(),
+          dutyValue: duty ?? "",
+        ),
       );
-      return;
 
+      if (hclhybriddata == 1) {
+
+        Navigator.pushAndRemoveUntil(
+
+          context,
+
+          MaterialPageRoute(builder: (_) => TrackingPage(address: widget.address, tripId: widget.tripId)),
+
+              (route) => false,
+
+        );
+
+      }
+
+      else {
+        Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+              builder: (context) =>
+                  TrackingWithOutHcl(address: widget.address, tripId: widget.tripId),
+            ), (route) => false
+        );
+
+      }
+
+    } else {
+      showFailureSnackBar(context, "Please, Upload Stating Kilometer");
     }
 
-    else if(hclhybriddata == 0) {
-      print('hybrid 0');
-
-      Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(
-        builder: (context) =>
-            TrackingWithOutHcl(address: widget.address, tripId: widget.tripId),
-      ), (route) => false
-  );
-      return;
-
-}
   }
-
   @override
   Widget build(BuildContext context) {
     bool isConnected = Provider.of<NetworkManager>(context).isConnected;
@@ -315,7 +365,9 @@ print('hybrid 1');
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Expanded(
+                  if(_selectedFile == null)...[
+
+                    Expanded(
                     child: ElevatedButton.icon(
                       onPressed: () => _pickFile(ImageSource.camera),
                       icon: Icon(Icons.camera_alt),
@@ -328,6 +380,7 @@ print('hybrid 1');
                       ),
                     ),
                   ),
+                  ],
                   // ElevatedButton.icon(
                   //   onPressed: () => _pickFile(ImageSource.gallery),
                   //   icon: Icon(Icons.upload_file),
@@ -350,13 +403,37 @@ print('hybrid 1');
                     padding: const EdgeInsets.all(8.0),
                     child: Column(
                       children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: Image.file(
-                            _selectedFile!,
-                            height: 200,
-                            width: double.infinity,
-                            fit: BoxFit.cover,
+                        SizedBox(
+                          height: 200, // same as image height
+                          width: double.infinity,
+                          child: Stack(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Image.file(
+                                  _selectedFile!,
+                                  height: 200,
+                                  width: double.infinity,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                              Positioned(
+                                top: 0,
+                                right: 0,
+                                child: InkWell(
+                                  onTap: () {
+                                    setState(() {
+                                      _selectedFile = null;
+                                    });
+                                  },
+                                  child: Icon(
+                                    Icons.cancel_outlined,
+                                    color: Colors.red,
+                                    size: 48,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                         SizedBox(height: 10),

@@ -20,14 +20,14 @@ class AppConstants {
 
 
   //local
-  // static const String baseUrl = "http://192.168.1.168:3009";
+  // static const String baseUrl = "http://192.168.2.17:3009";
   // static const String baseUrl = "https://192.168.1.145:7128";
 
 
 
   //jessycabs
   // static const String baseUrl = "https://jessycabs.com:7128";
-  static const String baseUrl = "http://52.91.161.155:7128";
+  static const String baseUrl = "http://202.83.45.236:7128";
 
 
 
