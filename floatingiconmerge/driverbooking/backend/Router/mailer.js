@@ -545,10 +545,10 @@ const { starttime, startdate, logdatetime } = results[0];
         </div>
 
     <!-- HEADER -->
-    <div style="display: flex; background: linear-gradient(90deg, #203f7d, #4c68d7); color: white;">
+    <div style="display: flex; background: #f1f1f1; color: #000000;">
       <div style="flex: 1; padding: 30px;">
         <h1 style="margin: 0; font-size: 26px;">Thanks for Riding, ${guestname}!</h1>
-        <p style="margin: 8px 0 0; color:#ffffff;">We hope you had a great experience with Jessy Cabs.</p>
+        <p style="margin: 8px 0 0; color:#000000;">We hope you had a great experience with Jessy Cabs.</p>
       </div>
       <div style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 20px;">
         <img src="https://images.icon-icons.com/2093/PNG/512/taxi_cab_transportation_automobile_car_vehicle_icon_128574.png
