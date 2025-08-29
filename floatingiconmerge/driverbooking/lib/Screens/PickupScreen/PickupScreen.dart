@@ -28,6 +28,11 @@ import 'package:geocoding/geocoding.dart' as geocoding;
 import 'package:location/location.dart';
 
 
+// import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart' as latLng2;
+import 'package:flutter_map/flutter_map.dart' as fm;
+
+
 class Pickupscreen extends StatefulWidget {
   final String address;
   final String tripId;
@@ -41,7 +46,7 @@ class _PickupscreenState extends State<Pickupscreen> with WidgetsBindingObserver
 
 
   bool _isMapLoading = true;
-  GoogleMapController? _mapController;
+  // GoogleMapController? _mapController;
   LatLng? _currentLatLng;
   // LatLng _destination = LatLng( 13.028159, 80.243306);
   LatLng? _destination;
@@ -51,6 +56,7 @@ class _PickupscreenState extends State<Pickupscreen> with WidgetsBindingObserver
   LocationData? _currentLocation;
   Location location = Location();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final fm.MapController _mapController = fm.MapController();
 
     final LatLng _initialPosition = LatLng(13.082680, 80.270721); // Replace with desired coordinates (e.g., Bengaluru, India)
     void initState() {
@@ -181,11 +187,18 @@ class _PickupscreenState extends State<Pickupscreen> with WidgetsBindingObserver
       _currentLatLng = latLng;
     });
 
-    if (_mapController != null) {
-      _mapController!.animateCamera(
-        CameraUpdate.newLatLngZoom(latLng, 15),
-      );
-    }
+
+    // Re-center the map automatically
+    _mapController.move(
+      latLng2.LatLng(latLng.latitude, latLng.longitude),
+      17.0, // zoom level (adjust to what you want)
+    );
+
+    // if (_mapController != null) {
+    //   _mapController!.animateCamera(
+    //     CameraUpdate.newLatLngZoom(latLng, 15),
+    //   );
+    // }
   }
 
   @override
@@ -215,36 +228,127 @@ class _PickupscreenState extends State<Pickupscreen> with WidgetsBindingObserver
 
 
 
-            GoogleMap(
-              onMapCreated: (controller) {
-                _mapController = controller;
-                setState(() {
-                  _isMapLoading = false;
-                });
+            // GoogleMap(
+            //   onMapCreated: (controller) {
+            //     _mapController = controller;
+            //     setState(() {
+            //       _isMapLoading = false;
+            //     });
+            //
+            //     if (_currentLatLng != null) {
+            //       _mapController!.animateCamera(
+            //         CameraUpdate.newLatLngZoom(_currentLatLng!, 15),
+            //       );
+            //     }
+            //   },
+            //   initialCameraPosition: CameraPosition(
+            //     target: _currentLatLng ?? _initialPosition,
+            //     zoom: 15,
+            //   ),
+            //   markers: _currentLatLng != null
+            //       ? {
+            //     Marker(
+            //       markerId: MarkerId('currentLocation'),
+            //       position: _currentLatLng!,
+            //       icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+            //     )
+            //   }
+            //       : {},
+            //   myLocationEnabled: false,
+            //   myLocationButtonEnabled: false,
+            // ),
 
-                if (_currentLatLng != null) {
-                  _mapController!.animateCamera(
-                    CameraUpdate.newLatLngZoom(_currentLatLng!, 15),
-                  );
-                }
-              },
-              initialCameraPosition: CameraPosition(
-                target: _currentLatLng ?? _initialPosition,
-                zoom: 15,
+
+            // FlutterMap(
+            //   options: MapOptions(
+            //     initialCenter: _currentLatLng != null
+            //         ? latLng2.LatLng(_currentLatLng!.latitude, _currentLatLng!.longitude)
+            //         : latLng2.LatLng(_initialPosition.latitude, _initialPosition.longitude),
+            //     initialZoom: 15,
+            //   ),
+            //   children: [
+            //     TileLayer(
+            //       urlTemplate: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+            //       subdomains: const ['a', 'b', 'c'],
+            //       userAgentPackageName: 'com.example.app',
+            //     ),
+            //     if (_currentLatLng != null)
+            //       MarkerLayer(
+            //         markers: [
+            //           fm.Marker(
+            //             point: latLng2.LatLng(_currentLatLng!.latitude, _currentLatLng!.longitude),
+            //             width: 40,
+            //             height: 40,
+            //             builder: (ctx) => const Icon(Icons.location_on, color: Colors.red, size: 35),
+            //           ),
+            //         ],
+            //       ),
+            //   ],
+            // ),
+
+            fm.FlutterMap(
+              mapController: _mapController,  // <--- Add this
+
+              options: fm.MapOptions(
+                initialCenter: _currentLatLng != null
+                    ? latLng2.LatLng(_currentLatLng!.latitude, _currentLatLng!.longitude)
+                    : latLng2.LatLng(_initialPosition.latitude, _initialPosition.longitude),
+                initialZoom: 15,
               ),
-              markers: _currentLatLng != null
-                  ? {
-                Marker(
-                  markerId: MarkerId('currentLocation'),
-                  position: _currentLatLng!,
-                  icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
-                )
-              }
-                  : {},
-              myLocationEnabled: false,
-              myLocationButtonEnabled: false,
-            ),
+              children: [
+                // fm.TileLayer(
+                //   urlTemplate: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                //   subdomains: const ['a', 'b', 'c'],
+                //   userAgentPackageName: 'com.example.app',
+                // ),
+                fm.TileLayer(
+                  urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                  userAgentPackageName: 'com.jessy.cabs',
+                  tileProvider: fm.NetworkTileProvider(
+                    headers: {
+                      'User-Agent': 'JessyCabs/1.0 (foxfahad386@gmail.com)',
+                    },
+                  ),
+                ),
 
+
+                if (_currentLatLng != null)
+                  fm.MarkerLayer(
+                    markers: [
+                      // fm.Marker(
+                      //   point: latLng2.LatLng(
+                      //     _currentLatLng!.latitude,
+                      //     _currentLatLng!.longitude,
+                      //   ),
+                      //   width: 40,
+                      //   height: 40,
+                      //   builder: (ctx) => const Icon(
+                      //     Icons.location_on,
+                      //     color: Colors.red,
+                      //     size: 35,
+                      //   ),
+                      // ),
+
+                      fm.Marker(
+                        point: latLng2.LatLng(
+                          _currentLatLng!.latitude,
+                          _currentLatLng!.longitude,
+                        ),
+                        width: 40,
+                        height: 40,
+                        child: const Icon(
+                          Icons.location_on,
+                          color: Colors.red,
+                          size: 35,
+                        ),
+                      ),
+
+                    ],
+                  ),
+
+
+              ],
+            ),
 
 
 

@@ -725,6 +725,9 @@ import android.content.pm.PackageManager
 import android.Manifest
 import androidx.core.app.ActivityCompat
 import android.os.Looper
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+
 
 
 
@@ -769,15 +772,41 @@ class MyBackgroundService : Service() {
     private lateinit var locationRequest: com.google.android.gms.location.LocationRequest
     private lateinit var locationCallback: com.google.android.gms.location.LocationCallback
 
+    private var offlineStart: Long? = null
+    private val handler = Handler(Looper.getMainLooper())
+
+    private val checkRunnable = object : Runnable {
+        override fun run() {
+            if (!isInternetAvailable(this@MyBackgroundService)) {
+                // Internet is OFF
+                if (offlineStart == null) {
+                    offlineStart = System.currentTimeMillis()
+                    Log.d("MyBackgroundService", "Internet lost at $offlineStart")
+                }
+            } else {
+                // Internet is ON
+                if (offlineStart != null) {
+                    val offlineEnd = System.currentTimeMillis()
+                    Log.d("MyBackgroundService", "Internet restored at $offlineEnd")
+//                    saveOfflineDataToServer(offlineStart!!, offlineEnd)
+                    saveOfflineDataToServer(tripId, offlineStart!!, offlineEnd)
+
+                    offlineStart = null
+                }
+            }
+            handler.postDelayed(this, 5000) // check every 5s
+        }
+    }
 
     override fun onCreate() {
         super.onCreate()
         instance = this
 
 
-//        openAutoStartSettingsIfAvailable(this)
+//  openAutoStartSettingsIfAvailable(this)
 
 
+        handler.post(checkRunnable)
 
 
 
@@ -1126,13 +1155,25 @@ class MyBackgroundService : Service() {
                 Location.distanceBetween(lastLat, lastLng, lat, lon, results)
                 distance = results[0].toDouble() // in meters
 
+//new code 26.08.2025
 
-                // 👇 Add movement threshold (e.g., 10 meters)
-//            val MIN_DISTANCE_THRESHOLD = 10.0
-//            if (distance < MIN_DISTANCE_THRESHOLD) {
-//                Log.i("DistanceFilter", "⛔ Movement too small ($distance m), skipping update")
-//                return  // Don't proceed if movement is insignificant
-//            }
+                // 🚦 1. Ignore very small movements (< 25m) → GPS jitter
+                if (distance < 10) {
+                    Log.i("DistanceFilter", "⛔ Ignored small jump: $distance m")
+                    return
+                }
+
+                // 🚦 2. Check accuracy (optional but recommended)
+                val currentLocation = Location("").apply {
+                    latitude = lat
+                    longitude = lon
+                }
+                if (currentLocation.accuracy > 10) { // e.g. only allow <= 20m accuracy
+                    Log.i("DistanceFilter", "⚠️ Ignored inaccurate location: ${currentLocation.accuracy}m")
+                    return
+                }
+
+//new code 26.08.2025
 
                 totalDistanceInMeters += distance
 
@@ -1177,6 +1218,7 @@ class MyBackgroundService : Service() {
 
                     val url = URL("http://202.83.45.236:7128/addvehiclelocationUniqueLatlong")
 //                    val url = URL("https://jessycabs.com:7128/addvehiclelocationUniqueLatlong")
+//                    val url = URL("http://192.168.0.109:3009/addvehiclelocationUniqueLatlong")
 
                     val conn = url.openConnection() as HttpURLConnection
                     conn.requestMethod = "POST"
@@ -1232,6 +1274,7 @@ class MyBackgroundService : Service() {
 
 //                    val url = URL("https://jessycabs.com:7128/addvehiclelocationUniqueLatlong")
                     val url = URL("http://202.83.45.236:7128/addvehiclelocationUniqueLatlong")
+//                    val url = URL("http://192.168.0.109:3009/addvehiclelocationUniqueLatlong")
 
                     val conn = url.openConnection() as HttpURLConnection
                     conn.requestMethod = "POST"
@@ -1533,6 +1576,8 @@ class MyBackgroundService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
+        handler.removeCallbacks(checkRunnable)
+
         try {
             fusedLocationClient.removeLocationUpdates(locationCallback) // ✅ Stop updates
             locationTimer?.cancel()
@@ -1579,4 +1624,59 @@ class MyBackgroundService : Service() {
 
 
     override fun onBind(intent: Intent?): IBinder? = null
+
+    private fun isInternetAvailable(context: Context): Boolean {
+        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val network = connectivityManager.activeNetwork ?: return false
+        val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
+        return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+    }
+    private fun formatDate(timestamp: Long): String {
+        val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        return sdf.format(Date(timestamp))
+    }
+
+    private fun formatTime(timestamp: Long): String {
+        val sdf = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
+        return sdf.format(Date(timestamp))
+    }
+
+    private fun saveOfflineDataToServer(tripId: String, start: Long, end: Long) {
+        // Example: API call
+//        val tripId = "12345" // replace with real value
+
+        val json = JSONObject()
+        json.put("Trip_id", tripId)
+//        json.put("Offline_Start", start.toString())
+//        json.put("Offline_end", end.toString())
+        json.put("Offline_Start", formatTime(start))  // ✅ formatted
+        json.put("Offline_end", formatTime(end))
+        json.put("Offline_StartDate", formatDate(start))  // ✅ formatted
+        json.put("Offline_endDate", formatDate(end))
+        json.put("status", "offline")
+
+        Thread {
+            try {
+                val url = URL("http://202.83.45.236:7128/networkConnection")
+//                val url = URL("http://192.168.0.109:3009/networkConnection")
+
+                val conn = url.openConnection() as HttpURLConnection
+                conn.requestMethod = "POST"
+                conn.setRequestProperty("Content-Type", "application/json")
+                conn.doOutput = true
+
+                val outputWriter = OutputStreamWriter(conn.outputStream)
+                outputWriter.write(json.toString())
+                outputWriter.flush()
+
+                val responseCode = conn.responseCode
+                Log.d("MyBackgroundService", "Response Code: $responseCode")
+
+                conn.disconnect()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }.start()
+    }
+
 }

@@ -1293,7 +1293,7 @@ import 'package:jessy_cabs/Screens/CustomerLocationReached/CustomerLocationReach
 import 'package:jessy_cabs/Utils/AllImports.dart';
 import 'package:jessy_cabs/Utils/AppTheme.dart';
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+// import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:jessy_cabs/main.dart';
 import 'package:location/location.dart';
 import 'dart:math' as math;
@@ -1318,6 +1318,11 @@ import 'package:flutter/services.dart';
 import '../../NativeTracker.dart';
 
 
+import 'package:flutter_map/flutter_map.dart' as fm;
+import 'package:latlong2/latlong.dart' as latLng2;
+
+
+
 class SharedPrefs {
   static Future<void> setBool(String key, bool value) async {
     final prefs = await SharedPreferences.getInstance();
@@ -1340,7 +1345,8 @@ class TrackingPage extends StatefulWidget {
   _TrackingPageState createState() => _TrackingPageState();
 }
 
-class _TrackingPageState extends State<TrackingPage> with WidgetsBindingObserver{
+class _TrackingPageState extends State<TrackingPage> with WidgetsBindingObserver , AutomaticKeepAliveClientMixin {
+  late final fm.MapController _mapController;
 
 
 
@@ -1351,17 +1357,18 @@ class _TrackingPageState extends State<TrackingPage> with WidgetsBindingObserver
   String? senderEmail;
   String? senderPass;
 
-  GoogleMapController? _mapController;
-  LatLng? _currentLatLng;
-  LatLng _destination = LatLng( 13.028159, 80.243306); // Chennai Central Railway Station
-  List<LatLng> _routeCoordinates = [];
+  // GoogleMapController? _mapController;
+  // LatLng? _currentLatLng;
+  // LatLng _destination = LatLng( 13.028159, 80.243306); // Chennai Central Railway Station
+  // List<LatLng> _routeCoordinates = [];
+  // LatLng? _lastSavedLatLng;
+
   Stream<LocationData>? _locationStream;
   bool isOtpVerified = false;
   bool isStartRideEnabled = false;
   String? latitude;
   String? longitude;
   // Variables to track last location and time
-  LatLng? _lastSavedLatLng;
   DateTime? _lastSavedTime;
   late String? tripId;
   String? vehiclevalue;
@@ -1375,6 +1382,10 @@ class _TrackingPageState extends State<TrackingPage> with WidgetsBindingObserver
 
 // for delay button 3 seconds
   bool _isRedirecting = false;
+  latLng2.LatLng? _currentLatLng;
+  latLng2.LatLng _destination = latLng2.LatLng(13.028159, 80.243306);
+  List<latLng2.LatLng> _routeCoordinates = [];
+  // final _mapController = fm.MapController();
 
   StreamSubscription<Position>? _positionStreamSubscription;
 
@@ -1383,6 +1394,7 @@ class _TrackingPageState extends State<TrackingPage> with WidgetsBindingObserver
     super.initState();
 
     WidgetsBinding.instance.addObserver(this);
+    _mapController = fm.MapController();
 
     _initializeLocationTracking();
     print("InitSate Work in TrackingPage ${_destination}");
@@ -1391,20 +1403,7 @@ class _TrackingPageState extends State<TrackingPage> with WidgetsBindingObserver
     _getLatLngFromAddress(widget.address);
     // _saveLocationToDatabase(12.9716, 77.5946);
     tripId = widget.tripId; // Assuming tripId is passed to the TrackingPage
-    // _loadTripDetails();
-    // WidgetsBinding.instance.addPostFrameCallback((_) {
-    //   final state = context.read<TripSheetDetailsTripIdBloc>().state;
-    //   if (state is TripDetailsByTripIdLoaded) {
-    //     final trip = state.tripDetails;
-    //
-    //     guestMobileNumber = trip['guestmobileno'];
-    //     guestEmail = trip['email'];
-    //
-    //     print('GuestNumber: $guestMobileNumber');
-    //     print('GuestEmail: $guestEmail');
-    //     // Do something with trip
-    //   }
-    // });
+
     context.read<TripTrackingDetailsBloc>().add(
         FetchTripTrackingDetails(widget.tripId!));
 
@@ -1421,6 +1420,8 @@ class _TrackingPageState extends State<TrackingPage> with WidgetsBindingObserver
 
   }
 
+  @override
+  bool get wantKeepAlive => true; // keeps map alive in tab/page switches
 
   Future<void> saveScreenData() async {
 
@@ -1433,19 +1434,6 @@ class _TrackingPageState extends State<TrackingPage> with WidgetsBindingObserver
     await prefs.setString('trip_id', widget.tripId);
 
     await prefs.setString('address', widget.address);
-
-
-
-
-
-    print('Saved screen datang:');
-
-    print('last_screen: TrackingPage');
-
-    print('trip_id: ${widget.tripId}');
-
-    print('address: ${widget.address}');
-
 
 
   }
@@ -1480,43 +1468,6 @@ class _TrackingPageState extends State<TrackingPage> with WidgetsBindingObserver
     // You can perform any logic using the fetched data here.
   }
 
-  Future<void> _loadTripDetails() async {
-    try {
-      // Fetch trip details from the API
-      final tripDetails = await ApiService.fetchTripDetails(tripId!);
-      print('Raw Trip details fetched: $tripDetails'); // Debugging
-
-      if (tripDetails != null) {
-        // Remove any accidental spaces or tabs in key names
-        var vehicleNo = tripDetails['vehRegNo']?.toString();
-        var tripStatusValue = tripDetails['apps'];
-        // var guestNumberValue = tripDetails['guestmobileno'];
-        // var guestEmailValue = tripDetails['email'];
-
-        print('Vehicle No: $vehicleNo');
-        print('Trip Status: $tripStatusValue');
-
-
-        if ((tripStatusValue != null) && (vehicleNo != null)) {
-          setState(() {
-            vehiclevalue = vehicleNo;
-            Statusvalue = tripStatusValue;
-
-
-          });
-          print('Updated vehiclevalue: $vehiclevalue');
-        } else {
-          print('Error: vehicleNo is null');
-        }
-      } else {
-        print('No trip details found.');
-      }
-    } catch (e) {
-      print('Error loading trip details: $e');
-    }
-  }
-
-
   Future<void> _getLatLngFromAddress(String address) async {
     print("map pio ins9ide");
 
@@ -1537,7 +1488,7 @@ class _TrackingPageState extends State<TrackingPage> with WidgetsBindingObserver
           print('hi');
           final location = data['results'][0]['geometry']['location'];
           setState(() {
-            _destination = LatLng(location['lat'], location['lng']);
+            _destination = latLng2.LatLng(location['lat'], location['lng']);
           });
           print("_getLatLngFromAddress Work in TrackingPage ${_destination}");
 
@@ -1556,39 +1507,12 @@ class _TrackingPageState extends State<TrackingPage> with WidgetsBindingObserver
   StreamSubscription<
       LocationData>? _locationSubscription; // Store the subscription
 
-  // Future<void> _initializeLocationTracking() async {
-  //   Location location = Location();
-  //
-  //   bool serviceEnabled = await location.serviceEnabled();
-  //   if (!serviceEnabled) {
-  //     serviceEnabled = await location.requestService();
-  //     if (!serviceEnabled) return;
-  //   }
-  //
-  //   PermissionStatus permissionGranted = await location.hasPermission();
-  //   if (permissionGranted == PermissionStatus.denied) {
-  //     permissionGranted = await location.requestPermission();
-  //     if (permissionGranted != PermissionStatus.granted) return;
-  //   }
-  //
-  //   final initialLocation = await location.getLocation();
-  //   _updateCurrentLocation(initialLocation);
-  //
-  //
-  //   _locationSubscription = location.onLocationChanged.listen((newLocation) {
-  //     print("New location received: $newLocation");
-  //     _updateCurrentLocation(newLocation);
-  //   });
-  // }
-
 
   Future<void> _initializeLocationTracking() async {
 
     print("yyyyyyyyyyyyyyyyyyy");
 
     Location location = Location();
-
-
 
     bool serviceEnabled = await location.serviceEnabled();
 
@@ -1670,8 +1594,8 @@ class _TrackingPageState extends State<TrackingPage> with WidgetsBindingObserver
 
 
 
-  List<LatLng> _decodePolyline(String encoded) {
-    List<LatLng> polylineCoordinates = [];
+  List<latLng2.LatLng> _decodePolyline(String encoded) {
+    List<latLng2.LatLng> polylineCoordinates = [];
     int index = 0,
         len = encoded.length;
     int lat = 0,
@@ -1699,7 +1623,7 @@ class _TrackingPageState extends State<TrackingPage> with WidgetsBindingObserver
       int dlng = (result & 1) != 0 ? ~(result >> 1) : (result >> 1);
       lng += dlng;
 
-      final point = LatLng(lat / 1e5, lng / 1e5);
+      final point = latLng2.LatLng(lat / 1e5, lng / 1e5);
       polylineCoordinates.add(point);
     }
 
@@ -1740,69 +1664,34 @@ class _TrackingPageState extends State<TrackingPage> with WidgetsBindingObserver
   }
 
 
+  // void _updateCameraPosition() {
+  //   if (_currentLatLng != null) {
+  //     _mapController?.animateCamera(
+  //       CameraUpdate.newCameraPosition(
+  //         CameraPosition(
+  //           target: _currentLatLng!,
+  //           zoom: 15,
+  //         ),
+  //       ),
+  //     );
+  //   }
+  // }
+
+
   void _updateCameraPosition() {
     if (_currentLatLng != null) {
-      _mapController?.animateCamera(
-        CameraUpdate.newCameraPosition(
-          CameraPosition(
-            target: _currentLatLng!,
-            zoom: 15,
-          ),
-        ),
-      );
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _mapController.move(
+            latLng2.LatLng(_currentLatLng!.latitude, _currentLatLng!.longitude),
+            15,
+          );
+        }
+      });
     }
   }
 
-  // Function to send location data to API
-  Future<void> _saveLocationToDatabase(double latitude,
-      double longitude) async {
-    print("inside normal");
 
-    print(
-        "Saving location: Latitude = $latitude, Longitude = $longitude"); // Debugging print
-
-    final Map<String, dynamic> requestData = {
-      "vehicleno": vehiclevalue,
-      "latitudeloc": latitude,
-      "longitutdeloc": longitude,
-      "Trip_id": tripId,
-      // Dummy Trip ID
-      "Runing_Date": DateTime.now().toIso8601String().split("T")[0],
-      // Current Date
-      "Runing_Time": DateTime.now().toLocal().toString().split(" ")[1],
-      // Current Time
-      "Trip_Status": Statusvalue,
-      "Tripstarttime": DateTime.now().toLocal().toString().split(" ")[1],
-      "TripEndTime": DateTime.now().toLocal().toString().split(" ")[1],
-      "created_at": DateTime.now().toIso8601String(),
-    };
-
-    print("Request Data: ${json.encode(requestData)}"); // Debugging print
-
-    try {
-      final response = await http.post(
-        Uri.parse("${AppConstants.baseUrl}/addvehiclelocationUniqueLatlong"),
-        headers: {"Content-Type": "application/json"},
-        body: json.encode(requestData),
-      );
-
-      print(
-          "Response Status Codeee: ${response.statusCode}"); // Debugging print
-      print("Response Body: ${response.body}"); // Debugging print
-
-      if (response.statusCode == 200) {
-        print("Lat Long Saved Successfully");
-      } else {
-        print("Failed to Save Lat Long");
-      }
-    } catch (e) {
-      print("Error sending location data: $e"); // Debugging print
-      // ScaffoldMessenger.of(context).showSnackBar(
-      //   SnackBar(content: Text("Error occurred")),
-      // );
-      showFailureSnackBar(context, "Error occurred");
-    }
-  }
 
 
   void _updateCurrentLocation(LocationData locationData) {
@@ -1812,7 +1701,7 @@ class _TrackingPageState extends State<TrackingPage> with WidgetsBindingObserver
     if (latitude != null && longitude != null) {
       print("Received Location: $latitude, $longitude");
 
-      final newLatLng = LatLng(latitude, longitude);
+      final newLatLng = latLng2.LatLng(latitude, longitude);
 
       setState(() {
         _currentLatLng = newLatLng;
@@ -1912,92 +1801,6 @@ class _TrackingPageState extends State<TrackingPage> with WidgetsBindingObserver
 
 
 
-  // void _updateCurrentLocation(LocationData locationData) {
-  //   if (locationData.latitude != null && locationData.longitude != null) {
-  //     print("Received Location: ${locationData.latitude}, ${locationData.longitude}");
-  //
-  //     final newLatLng = LatLng(locationData.latitude!, locationData.longitude!);
-  //
-  //     setState(() {
-  //       _currentLatLng = newLatLng;
-  //     });
-  //
-  //     _fetchRoute();
-  //     _updateCameraPosition();
-  //     _saveLocationToDatabase(locationData.latitude!, locationData.longitude!);
-  //
-  //   } else {
-  //     print("Location data is null");
-  //   }
-  // }
-
-
-  // void _updateCurrentLocation(LocationData locationData) {
-  //   // Ensure values are not null before using
-  //   double? latitude = locationData.latitude;
-  //   double? longitude = locationData.longitude;
-  //
-  //   if (latitude != null && longitude != null) {
-  //     print("Received Location: $latitude, $longitude");
-  //
-  //     final newLatLng = LatLng(latitude, longitude);
-  //
-  //     setState(() {
-  //       _currentLatLng = newLatLng;
-  //     });
-  //
-  //     _fetchRoute();
-  //     _updateCameraPosition();
-  //
-  //     // Now call your functions safely
-  //     // _saveLocationToDatabase(latitude, longitude);
-  //     saveLocation(latitude, longitude);
-  //   } else {
-  //     print("⚠ Location data is null, skipping update");
-  //   }
-  // }
-
-
-  bool _shouldSaveLocation(LatLng newLatLng) {
-    print("Inside _shouldSaveLocation...");
-
-    const double locationThreshold = 0.001;
-    const int timeThreshold = 30;
-
-    if (_lastSavedLatLng != null) {
-      double distance = _calculateDistance(_lastSavedLatLng!, newLatLng);
-      bool hasSignificantChange = distance > locationThreshold;
-      bool hasTimePassed = _lastSavedTime == null ||
-          DateTime
-              .now()
-              .difference(_lastSavedTime!)
-              .inSeconds > timeThreshold;
-
-      print(
-          "Distanceeeee: $distance, Significant Change: $hasSignificantChange, Time Passed: $hasTimePassed");
-
-      if (hasSignificantChange || hasTimePassed) {
-        return true;
-      }
-    }
-
-    print("Returning false from _shouldSaveLocation");
-    return false;
-  }
-
-  double _calculateDistance(LatLng start, LatLng end) {
-    const double earthRadius = 6371; // Radius in kilometers
-    double dLat = _degToRad(end.latitude - start.latitude);
-    double dLng = _degToRad(end.longitude - start.longitude);
-
-    double a = math.sin(dLat / 2) * math.sin(dLat / 2) +
-        math.cos(_degToRad(start.latitude)) *
-            math.cos(_degToRad(end.latitude)) *
-            math.sin(dLng / 2) *
-            math.sin(dLng / 2);
-    double c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
-    return earthRadius * c; // Returns distance in kilometers
-  }
 
   double _degToRad(double deg) {
     return deg * (math.pi / 180.0);
@@ -2027,9 +1830,7 @@ class _TrackingPageState extends State<TrackingPage> with WidgetsBindingObserver
     print('coming inside');
     if (tripId == null) {
       print('Error: tripId is null');
-      // ScaffoldMessenger.of(context).showSnackBar(
-      //   SnackBar(content: Text('Trip ID is missing. Cannot start the ride.')),
-      // );
+
       showWarningSnackBar(context, 'Trip ID is missing. Cannot start the ride.');
       return;
     }
@@ -2080,12 +1881,6 @@ class _TrackingPageState extends State<TrackingPage> with WidgetsBindingObserver
 
 
   Future<void> _handleStartRideButton() async {
-    // _handleStartTrip(
-    //   (latitude as num?)?.toDouble() ?? 0.0,
-    //   (longitude as num?)?.toDouble() ?? 0.0,
-    // );
-
-
     if (_currentLatLng == null) {
       showWarningSnackBar(context, "Location not available yet! Please Wait");
       return;
@@ -2095,19 +1890,6 @@ class _TrackingPageState extends State<TrackingPage> with WidgetsBindingObserver
 
 
     if (_currentLatLng != null) {
-      // _handleStartTrip(_currentLatLng!.latitude, _currentLatLng!.longitude);
-      // // Navigator.pushAndRemoveUntil(
-      // //     context,
-      // //     MaterialPageRoute(
-      // //       builder: (context) => Customerlocationreached(tripId: tripId!),
-      // //     ),(route)=> false
-      // // );
-      //
-      //
-      // await _handleStartRide(context);
-      //
-      // showInfoSnackBar(context, 'Trip started');
-
       try {
         print('i will trigger OTP');
 
@@ -2176,9 +1958,7 @@ class _TrackingPageState extends State<TrackingPage> with WidgetsBindingObserver
                     print("Trip details are still empty after setting state.");
                   }
                 } else if (state is SaveLocationSuccess) {
-                  // ScaffoldMessenger.of(context).showSnackBar(
-                  //   SnackBar(content: Text("Location saved successfully!")),
-                  // );
+
                   showSuccessSnackBar(context, "Location saved successfully! $tripStatus");
                 } else if (state is SaveLocationFailure) {
 
@@ -2235,159 +2015,12 @@ class _TrackingPageState extends State<TrackingPage> with WidgetsBindingObserver
               onRefresh: _refreshTrackingPage,
 
 
-              //        child: Stack(
-              //
-              //          children: [
-              //               if (!_isMapLoading && _currentLatLng != null)
-              //                 GoogleMap(
-              //                   initialCameraPosition: CameraPosition(
-              //                     target: _currentLatLng!,
-              //                     zoom: 15,
-              //                   ),
-              //                   onMapCreated: (controller) {
-              //                     _mapController = controller;
-              //                     Future.delayed(Duration(milliseconds: 500), () {
-              //                       if (mounted) {
-              //                         setState(() {
-              //                           _isMapLoading = false; // Hide loader after small delay
-              //                         });
-              //                       }
-              //                     });
-              //                   },
-              //                   markers: {
-              //                     Marker(
-              //                       markerId: MarkerId('currentLocation'),
-              //                       position: _currentLatLng!,
-              //                       icon: BitmapDescriptor.defaultMarkerWithHue(
-              //                           // BitmapDescriptor.hueBlue),
-              //                           BitmapDescriptor.hueGreen),
-              //                     ),
-              //                     Marker(
-              //                       markerId: MarkerId('destination'),
-              //                       position: _destination,
-              //                     ),
-              //                   },
-              //                   polylines: {
-              //                     if (_routeCoordinates.isNotEmpty)
-              //                       Polyline(
-              //                         polylineId: PolylineId('route'),
-              //                         points: _routeCoordinates,
-              //                         color: Colors.green,
-              //                         width: 5,
-              //                       ),
-              //                   },
-              //                   myLocationEnabled: true,
-              //                   myLocationButtonEnabled: false,
-              //                 ),
-              //            // Show CircularProgressIndicator while map is loading
-              //            // Show loader until Google Map loads
-              //            if (_isMapLoading)
-              //              Positioned.fill(
-              //                child: Container(
-              //                  color: Colors.white.withOpacity(0.9), // Optional: add slight overlay
-              //                  child: Center(
-              //                    child: CircularProgressIndicator(),
-              //                  ),
-              //                ),
-              //              ),
-              //
-              //
-              //            Positioned(
-              //                 bottom: 0,
-              //                 left: 0,
-              //                 right: 0,
-              //                 child: IgnorePointer(
-              //                   ignoring: false,
-              //                   child: Container(
-              //                     height: 150,
-              //                     padding: EdgeInsets.all(16),
-              //                     color: Colors.white,
-              //
-              //                     child: Column(
-              //                       mainAxisSize: MainAxisSize.min,
-              //                       children: [
-              //
-              //                         // SizedBox(height: 40),
-              //                         Text('Current Trip Status:  $tripStatus',style: TextStyle(fontSize: 20.0),),
-              //                         // SizedBox(height: 40),
-              //                         SizedBox(
-              //                           width: double.infinity,
-              //                           child:
-              //
-              //
-              //                           ElevatedButton(
-              //                             // onPressed: () async {
-              //                             //   setState(() {
-              //                             //     Statusvalue = 'Start'; // Set Trip_Status to "waypoint"
-              //                             //   });
-              //                             //
-              //                             //   // Call the function to save location with updated status
-              //                             //   if (_currentLatLng != null) {
-              //                             //     _saveLocationToDatabase(
-              //                             //       _currentLatLng!.latitude,
-              //                             //       _currentLatLng!.longitude,
-              //                             //     );
-              //                             //
-              //                             //     // await _handleStartRide(context);
-              //                             //     // _handleStartTrip
-              //                             //
-              //                             //     Navigator.push(
-              //                             //       context,
-              //                             //       MaterialPageRoute(
-              //                             //         builder: (context) => Customerlocationreached(tripId:tripId!),
-              //                             //       ),
-              //                             //     );
-              //                             //     print(' values success');
-              //                             //
-              //                             //   } else {
-              //                             //     print("Errorrrr: _currentLatLng is null");
-              //                             //   }
-              //                             //   // await _handleStartRide(context);
-              //                             //
-              //                             // },
-              //                             onPressed: _handleStartRideButton,
-              //
-              //                             style: ElevatedButton.styleFrom(
-              //                               backgroundColor: AppTheme.Navblue1,
-              //                               padding: EdgeInsets.symmetric(vertical: 16),
-              //                               shape: RoundedRectangleBorder(
-              //                                 borderRadius: BorderRadius.circular(8),
-              //                               ),
-              //                             ),
-              //
-              //                             child: Text(
-              //                               'Start Ride',
-              //                               style: TextStyle(
-              //                                   fontSize: 20.0, color: Colors.white),
-              //                             ),
-              //                           ),
-              //
-              //                         ),
-              //                       ],
-              //                     ),
-              //                   ),
-              //                 ),
-              //               ),
-              //            Positioned(
-              //              top: 15,
-              //              left: 0,
-              //              right: 0,
-              //              child: NoInternetBanner(isConnected: isConnected),
-              //            ),
-              //     ],
-              //           )
-              //           )
-              //         )
-              //     );
-              //   }
-              //
-              //
-              // }
+                child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: SizedBox(
+                        height: MediaQuery.of(context).size.height, // Fill screen
 
-
-
-
-                    child: Stack(
+    child: Stack(
 
                       children: [
 
@@ -2396,85 +2029,152 @@ class _TrackingPageState extends State<TrackingPage> with WidgetsBindingObserver
                         if (_isLocationInitialized  && _currentLatLng != null)
                           SizedBox.expand(
                             child:
-                          GoogleMap(
+                          // GoogleMap(
+                          //
+                          //   initialCameraPosition: CameraPosition(
+                          //
+                          //     target: _currentLatLng!,
+                          //
+                          //     zoom: 15,
+                          //
+                          //   ),
+                          //
+                          //   onMapCreated: (controller) {
+                          //
+                          //     _mapController = controller;
+                          //
+                          //     Future.delayed(Duration(milliseconds: 500), () {
+                          //
+                          //       if (mounted) {
+                          //
+                          //         setState(() {
+                          //
+                          //           _isMapLoading = false; // Hide loader after small delay
+                          //
+                          //         });
+                          //
+                          //       }
+                          //
+                          //     });
+                          //
+                          //   },
+                          //
+                          //   markers: {
+                          //
+                          //     Marker(
+                          //
+                          //       markerId: MarkerId('currentLocation'),
+                          //
+                          //       position: _currentLatLng!,
+                          //
+                          //       icon: BitmapDescriptor.defaultMarkerWithHue(
+                          //
+                          //         // BitmapDescriptor.hueBlue),
+                          //
+                          //           BitmapDescriptor.hueGreen),
+                          //
+                          //     ),
+                          //
+                          //     Marker(
+                          //
+                          //       markerId: MarkerId('destination'),
+                          //
+                          //       position: _destination,
+                          //
+                          //     ),
+                          //
+                          //   },
+                          //
+                          //   polylines: {
+                          //
+                          //     if (_routeCoordinates.isNotEmpty)
+                          //
+                          //       Polyline(
+                          //
+                          //         polylineId: PolylineId('route'),
+                          //
+                          //         points: _routeCoordinates,
+                          //
+                          //         color: Colors.green,
+                          //
+                          //         width: 5,
+                          //
+                          //       ),
+                          //
+                          //   },
+                          //
+                          //   myLocationEnabled: true,
+                          //
+                          //   myLocationButtonEnabled: false,
+                          //
+                          // ),
 
-                            initialCameraPosition: CameraPosition(
 
-                              target: _currentLatLng!,
+                              fm.FlutterMap(
+                                // mapController: fm.MapController(),
+                                mapController: _mapController,
 
-                              zoom: 15,
+                                options: fm.MapOptions(
+                                  initialCenter: _currentLatLng != null
+                                      ? latLng2.LatLng(_currentLatLng!.latitude, _currentLatLng!.longitude)
+                                      : latLng2.LatLng(13.028159, 80.243306), // fallback
+                                  initialZoom: 15,
 
-                            ),
+                                  interactionOptions: const fm.InteractionOptions(
+                                    flags: fm.InteractiveFlag.all,
+                                  ),
 
-                            onMapCreated: (controller) {
-
-                              _mapController = controller;
-
-                              Future.delayed(Duration(milliseconds: 500), () {
-
-                                if (mounted) {
-
-                                  setState(() {
-
-                                    _isMapLoading = false; // Hide loader after small delay
-
-                                  });
-
-                                }
-
-                              });
-
-                            },
-
-                            markers: {
-
-                              Marker(
-
-                                markerId: MarkerId('currentLocation'),
-
-                                position: _currentLatLng!,
-
-                                icon: BitmapDescriptor.defaultMarkerWithHue(
-
-                                  // BitmapDescriptor.hueBlue),
-
-                                    BitmapDescriptor.hueGreen),
-
-                              ),
-
-                              Marker(
-
-                                markerId: MarkerId('destination'),
-
-                                position: _destination,
-
-                              ),
-
-                            },
-
-                            polylines: {
-
-                              if (_routeCoordinates.isNotEmpty)
-
-                                Polyline(
-
-                                  polylineId: PolylineId('route'),
-
-                                  points: _routeCoordinates,
-
-                                  color: Colors.green,
-
-                                  width: 5,
 
                                 ),
+                                children: [
+                                  fm.TileLayer(
+                                    urlTemplate: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                                    // subdomains: const ['a', 'b', 'c'],
+                                    userAgentPackageName: "com.jessy.cabs", // required
+                                  ),
 
-                            },
+                                  // ✅ Current location marker
+                                  if (_currentLatLng != null)
+                                    fm.MarkerLayer(
+                                      markers: [
+                                        fm.Marker(
+                                          point: latLng2.LatLng(_currentLatLng!.latitude, _currentLatLng!.longitude),
+                                          width: 40,
+                                          height: 40,
+                                          child: const Icon(Icons.location_on, color: Colors.green, size: 35),
+                                        ),
+                                      ],
+                                    ),
 
-                            myLocationEnabled: true,
+                                  // ✅ Destination marker
+                                  fm.MarkerLayer(
+                                    markers: [
+                                      fm.Marker(
+                                        point: latLng2.LatLng(_destination.latitude, _destination.longitude),
+                                        width: 40,
+                                        height: 40,
+                                        child: const Icon(Icons.flag, color: Colors.red, size: 35),
+                                      ),
+                                    ],
+                                  ),
 
-                            myLocationButtonEnabled: false,
+                                  // ✅ Polyline for route
+                                  if (_routeCoordinates.isNotEmpty)
+                                    fm.PolylineLayer(
+                                      polylines: [
+                                        fm.Polyline(
+                                          points: _routeCoordinates
+                                              .map((e) => latLng2.LatLng(e.latitude, e.longitude))
+                                              .toList(),
+                                          color: Colors.green,
+                                          strokeWidth: 4,
+                                        ),
+                                      ],
+                                    ),
+                                ],
+                              )
 
-                          ),),
+                          ),
 
 
 
@@ -2496,109 +2196,6 @@ class _TrackingPageState extends State<TrackingPage> with WidgetsBindingObserver
 
                           ),
 
-                        // Positioned(
-                        //
-                        //   bottom: 0,
-                        //
-                        //   left: 0,
-                        //
-                        //   right: 0,
-                        //
-                        //   child: IgnorePointer(
-                        //
-                        //     ignoring: false,
-                        //
-                        //     child: Container(
-                        //
-                        //       height: 150,
-                        //
-                        //       padding: EdgeInsets.all(16),
-                        //
-                        //       color: Colors.white,
-                        //
-                        //
-                        //
-                        //       child: Column(
-                        //
-                        //         mainAxisSize: MainAxisSize.min,
-                        //
-                        //         children: [
-                        //
-                        //           // Text('Current Trip Status:  $tripStatus',style: TextStyle(fontSize: 20.0,),),
-                        //
-                        //
-                        //           // Text(
-                        //           //
-                        //           //   ' currentLatLng: $_currentLatLng',
-                        //           //
-                        //           //   style: TextStyle(fontSize: 20.0, ),
-                        //           //
-                        //           // ),
-                        //
-                        //           SizedBox(height: 40),
-                        //
-                        //           // SizedBox(
-                        //           //
-                        //           //   width: double.infinity,
-                        //           //
-                        //           //   child:
-                        //           //
-                        //           //   ElevatedButton(
-                        //           //
-                        //           //     // onPressed: _handleStartRideButton,
-                        //           //     onPressed: _isLoading ? null : _handleStartRideButton,
-                        //           //
-                        //           //     style: ElevatedButton.styleFrom(
-                        //           //
-                        //           //       backgroundColor: AppTheme.Navblue1,
-                        //           //
-                        //           //       padding: EdgeInsets.symmetric(vertical: 16),
-                        //           //
-                        //           //       shape: RoundedRectangleBorder(
-                        //           //
-                        //           //         borderRadius: BorderRadius.circular(8),
-                        //           //
-                        //           //       ),
-                        //           //
-                        //           //     ),
-                        //           //
-                        //           //
-                        //           //
-                        //           //     child:  _isLoading
-                        //           //         ? SizedBox(
-                        //           //       height: 20,
-                        //           //       width: 20,
-                        //           //       child: CircularProgressIndicator(
-                        //           //         color: Colors.white,
-                        //           //         strokeWidth: 2,
-                        //           //       ),
-                        //           //     )
-                        //           //         : Text(
-                        //           //
-                        //           //       'Start Ride',
-                        //           //
-                        //           //       style: TextStyle(
-                        //           //
-                        //           //           fontSize: 20.0, color: Colors.white),
-                        //           //
-                        //           //     ),
-                        //           //
-                        //           //   ),
-                        //           //
-                        //           //
-                        //           //
-                        //           // ),
-                        //
-                        //         ],
-                        //
-                        //       ),
-                        //
-                        //     ),
-                        //
-                        //   ),
-                        //
-                        // ),
-
                         Positioned(
 
                           top: 15,
@@ -2615,7 +2212,7 @@ class _TrackingPageState extends State<TrackingPage> with WidgetsBindingObserver
 
                     )
 
-
+            ))
             ),
             bottomNavigationBar: BottomAppBar(
               color: Colors.white,
@@ -2630,12 +2227,6 @@ class _TrackingPageState extends State<TrackingPage> with WidgetsBindingObserver
                     // onPressed: _isLoading ? null : _handleStartRideButton,
                     onPressed: (_isRedirecting || _isLoading) ? null : _handleStartRideButton,
 
-                    // onPressed: (){
-                    //   context.read<OtpBloc>().add(OtpEvent(
-                    //     guestNumber: guestMobileNumber.toString(),
-                    //     guestEmail: guestEmail.toString(),
-                    //   ));
-                    // },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppTheme.Navblue1,
                       padding: const EdgeInsets.symmetric(vertical: 16),
@@ -2669,6 +2260,20 @@ class _TrackingPageState extends State<TrackingPage> with WidgetsBindingObserver
   }
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
