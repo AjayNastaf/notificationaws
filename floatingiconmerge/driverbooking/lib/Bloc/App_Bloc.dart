@@ -773,6 +773,7 @@ class TripUploadBloc extends Bloc<TripUploadEvent, TripUploadState> {
     on<UploadClosingKmText>(_uploadClosingKmText);
     on<UploadClosingKmImage>(_uploadClosingKmImage);
     on<UpdateSignatureStatus>(_updateSignatureStatus);
+    on<UpdateClosingkm>(_updateClosingkm);
   }
 
 
@@ -837,6 +838,7 @@ class TripUploadBloc extends Bloc<TripUploadEvent, TripUploadState> {
         closeKm: event.closeKm,
         hcl: event.hcl,
         duty: event.duty,
+        finalkilometers:event.finalkilometers,
       );
 
       emit(TripUploadSuccess("Closing Kilometer details updated successfully"));
@@ -844,6 +846,24 @@ class TripUploadBloc extends Bloc<TripUploadEvent, TripUploadState> {
       emit(TripUploadFailure("Error updating data: $error"));
     }
   }
+
+  Future<void> _updateClosingkm(UpdateClosingkm event, Emitter<TripUploadState> emit) async {
+    emit(TripUploadLoading());
+    try {
+      await ApiService.finalupdateCloseKMToTripDetailsUploadScreen(
+        tripId: event.tripId,
+        finalcloseKm: event.finalcloseKm,
+        hcl: event.hcl,
+        duty: event.duty,
+      );
+
+      emit(TripUploadSuccess("Closing Kilometer details updated successfully"));
+    } catch (error) {
+      emit(TripUploadFailure("Error updating data: $error"));
+    }
+  }
+
+
 }
 //this the total bloc implementing 3 apis in the Trip details Upload page completed
 

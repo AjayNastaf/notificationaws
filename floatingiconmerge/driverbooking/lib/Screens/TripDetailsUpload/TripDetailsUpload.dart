@@ -89,7 +89,7 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> with WidgetsBindi
 
   double roundedDistance = 0.0;
 
-
+String ? finalkilometers ;
 
   String setFormattedDate(String? dateStr) {
     if (dateStr == null || dateStr.isEmpty) return "Not available"; // Handle null case
@@ -239,10 +239,6 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> with WidgetsBindi
 
            startkmvalue = fetchedStartkmvalue;
 
-           // double startKm = double.parse(fetchedStartkmvalue);
-           // double endKm = double.parse(fetchedClosedkm);
-           //
-           // distance = startKm - endKm;
 
           try {
             double startKm = double.tryParse(fetchedStartkmvalue) ?? 0;
@@ -274,14 +270,7 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> with WidgetsBindi
            fetchClose = fetchedclosetime ?? '';
 
            print('between distance${fetchGuestEail}');
-           print('between distance${fetchdestination}');
-           print('between distance${fetchVechName}');
-           print('between distance${fetchVechNum}');
-           print('between distance${fetchdutyType}');
 
-           print('between distance${fetchaddress}');
-           print('between distance${fetchStart}');
-           print('between distance${fetchClose}');
 
 
           // tripDuration.text =fetchtripduration ?? '';
@@ -294,14 +283,7 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> with WidgetsBindi
 
            vehicleTypeController.text = fetchedvechtype ?? '';
 
-           // startDateController.text = fetchedStartdate ?? '';
 
-           // closeDateController.text = fetchedguestmobile ?? '';
-
-           closeKmController.text = fetchedClosedkm ?? '';
-          // Populate the form fields with the fetched data
-
-          // startKmController.text = startkmvalue ?? '';
 
            var fetchStartDate = fetchedStartdate ?? '';
 
@@ -399,11 +381,22 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> with WidgetsBindi
       print('Using startkmvalue in another function: $startkmvalue');
 
       int startKmInt = int.parse(startkmvalue!); // Convert string to int
-      int totalDistance = startKmInt + roundedDistance;
+      // int totalDistance = startKmInt + roundedDistance;
+      int totalDistance =  roundedDistance;
       print('Total Distance (start + rounded): $totalDistance');
-      closeKmController.text = totalDistance.toString();
+      // closeKmController.text = totalDistance.toString();
 
       // closeKmController = TextEditingController(text: totalDistance.toString());
+
+
+      finalkilometers = totalDistance.toString();
+
+      setState((){
+        finalkilometers = totalDistance.toString();
+
+      });
+      print('Total Distance (start + rounded): $finalkilometers');
+
     } else {
       print('startkmvalue is not available.');
     }
@@ -939,8 +932,9 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> with WidgetsBindi
                               children: [
                                 Expanded(
                                   child: TextField(
-                                    readOnly: fetchedHybridData !='1' ? false : true,  // is this value will be 0 we can write
-                                    enabled: fetchedHybridData != '1',  // expected : enable = 0;
+                                    // readOnly: fetchedHybridData !='1' ? false : true,  // is this value will be 0 we can write
+                                    // enabled: fetchedHybridData != '1',  // expected : enable = 0;
+                                    enabled: true,  // expected : enable = 0;
                                     controller: closeKmController,
                                     // enabled: isCloseKmEnabled,
                                     decoration: const InputDecoration(
@@ -1104,12 +1098,14 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> with WidgetsBindi
 
                                     final dutyValue = duty ?? "";
                                     final hclValue = hcl ?? 0;
+                                    final finalkilometervar = finalkilometers??'';
 
                                     _tripUploadBloc.add(UpdateSignatureStatus(
                                       tripId: widget.tripId,
                                       closeKm: closeKmController.text,
                                       duty: dutyValue,
                                       hcl: hclValue,
+                                      finalkilometers:finalkilometervar,
                                     ));
 
                                   // ✅ Always navigate, no matter what
@@ -1117,12 +1113,7 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> with WidgetsBindi
                                     resetNativeTracking();
 
                                     Future.delayed(Duration(seconds: 2), () {
-                                      // Navigator.pushReplacement(
-                                      //   context,
-                                      //   MaterialPageRoute(
-                                      //     builder: (context) => TripDetailsPreview(tripId: widget.tripId),
-                                      //   ),
-                                      // );
+
 
                                       Navigator.pushAndRemoveUntil(
                                         context,

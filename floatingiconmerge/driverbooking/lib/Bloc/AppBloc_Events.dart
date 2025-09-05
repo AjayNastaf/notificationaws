@@ -400,10 +400,27 @@ class UpdateSignatureStatus extends TripUploadEvent {
   final String closeKm;
   final String duty;
   final int hcl;
+  final String finalkilometers;
 
   UpdateSignatureStatus({
     required this.tripId,
     required this.closeKm,
+    required this.duty,
+    required this.hcl,
+    required this.finalkilometers
+  });
+}
+
+
+class UpdateClosingkm extends TripUploadEvent {
+  final String tripId;
+  final String finalcloseKm;
+  final String duty;
+  final int hcl;
+
+  UpdateClosingkm({
+    required this.tripId,
+    required this.finalcloseKm,
     required this.duty,
     required this.hcl,
   });

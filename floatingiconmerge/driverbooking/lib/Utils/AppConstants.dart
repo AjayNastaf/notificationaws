@@ -20,7 +20,7 @@ class AppConstants {
 
 
   //local
-  // static const String baseUrl = "http://192.168.2.8:3009";
+  // static const String baseUrl = "http://192.168.2.23:3008";
   // static const String baseUrl = "https://192.168.1.145:7128";
 
 

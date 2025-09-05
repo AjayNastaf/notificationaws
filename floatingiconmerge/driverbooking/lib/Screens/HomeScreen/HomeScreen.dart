@@ -312,6 +312,7 @@ import 'package:jessy_cabs/Screens/MenuListScreens/Settings/Settings.dart';
 import 'package:jessy_cabs/Screens/MenuListScreens/Wallet/WalletScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:jessy_cabs/Networks/Api_Service.dart';
+import 'package:jessy_cabs/Screens/TripDetailsUpload/TripDetailsUpload.dart';
 import 'package:jessy_cabs/Utils/AllImports.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -1604,6 +1605,9 @@ class _HomescreenState extends State<Homescreen> {
                                 tripId: trip['tripid'].toString()),
                           ),
                         );
+
+
+
                       }else {
                         Navigator.push(
                           context,
@@ -1615,7 +1619,22 @@ class _HomescreenState extends State<Homescreen> {
                               duty: trip['duty'].toString(),
                             ),
                           ),
+
+
                         );
+
+                        // Navigator.push(
+                        //   context,
+                        //   MaterialPageRoute(
+                        //     builder: (context) => TripDetailsUpload(
+                        //       tripId: trip['tripid'].toString(),
+                        //     ),
+                        //   ),
+                        //
+                        //
+                        // );
+
+
                       }
                     }
                         : null,  // Disable onTap if not the first item

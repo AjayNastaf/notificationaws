@@ -1495,11 +1495,49 @@ class MyBackgroundService : Service() {
         }
     }
 
+//    inner class FloatingOnTouchListener(private val params: WindowManager.LayoutParams) : View.OnTouchListener {
+//        private var initialX = 0
+//        private var initialY = 0
+//        private var initialTouchX = 0f
+//        private var initialTouchY = 0f
+//
+//        override fun onTouch(v: View?, event: MotionEvent): Boolean {
+//            when (event.action) {
+//                MotionEvent.ACTION_DOWN -> {
+//                    initialX = params.x
+//                    initialY = params.y
+//                    initialTouchX = event.rawX
+//                    initialTouchY = event.rawY
+//                    return true
+//                }
+//                MotionEvent.ACTION_MOVE -> {
+//                    params.x = initialX + (event.rawX - initialTouchX).toInt()
+//                    params.y = initialY + (event.rawY - initialTouchY).toInt()
+//                    windowManager.updateViewLayout(floatingView, params)
+//                    return true
+//                }
+//                MotionEvent.ACTION_UP -> {
+//                    val intent = Intent(applicationContext, MainActivity::class.java).apply {
+//                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+//                        putExtra("fromFloatingIcon", true)
+//                    }
+//                    startActivity(intent)
+//                    return true
+//                }
+//            }
+//            return false
+//        }
+//    }
+
+
+
     inner class FloatingOnTouchListener(private val params: WindowManager.LayoutParams) : View.OnTouchListener {
         private var initialX = 0
         private var initialY = 0
         private var initialTouchX = 0f
         private var initialTouchY = 0f
+        private var isClick = false
+        private val CLICK_THRESHOLD = 10 // px tolerance for click vs drag
 
         override fun onTouch(v: View?, event: MotionEvent): Boolean {
             when (event.action) {
@@ -1508,26 +1546,48 @@ class MyBackgroundService : Service() {
                     initialY = params.y
                     initialTouchX = event.rawX
                     initialTouchY = event.rawY
+                    isClick = true
                     return true
                 }
+
                 MotionEvent.ACTION_MOVE -> {
-                    params.x = initialX + (event.rawX - initialTouchX).toInt()
-                    params.y = initialY + (event.rawY - initialTouchY).toInt()
+                    val dx = (event.rawX - initialTouchX).toInt()
+                    val dy = (event.rawY - initialTouchY).toInt()
+
+                    // If moved more than threshold → treat as drag, not click
+                    if (Math.abs(dx) > CLICK_THRESHOLD || Math.abs(dy) > CLICK_THRESHOLD) {
+                        isClick = false
+                    }
+
+                    params.x = initialX + dx
+                    params.y = initialY + dy
                     windowManager.updateViewLayout(floatingView, params)
                     return true
                 }
+
                 MotionEvent.ACTION_UP -> {
-                    val intent = Intent(applicationContext, MainActivity::class.java).apply {
-                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                        putExtra("fromFloatingIcon", true)
+                    if (isClick) {
+                        // ✅ Only open activity if it was a "click", not drag
+                        val intent = Intent(applicationContext, MainActivity::class.java).apply {
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                            putExtra("fromFloatingIcon", true)
+                        }
+                        startActivity(intent)
                     }
-                    startActivity(intent)
                     return true
                 }
             }
             return false
         }
     }
+
+
+
+
+
+
+
+
 
 //    override fun onDestroy() {
 //        super.onDestroy()

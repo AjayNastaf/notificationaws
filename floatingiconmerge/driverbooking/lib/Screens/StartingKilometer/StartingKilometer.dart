@@ -263,21 +263,21 @@ class _StartingKilometerState extends State<StartingKilometer>  with WidgetsBind
   Future<void> _goToNextScreen() async {
     print("object");
 
+
     if (_selectedFile != null) {
-      context.read<StartKmBloc>().add(
-        UploadStartingKilometerImage(
-          tripId: widget.tripId,
-          startingKilometerImage: _selectedFile!,
-        ),
-      );
-
-
       context.read<StartKmBloc>().add(
         SubmitStartingKilometerText(
           tripId: widget.tripId,
           startKm: _startKM.text,
           hclValue: hclhybriddata.toString(),
           dutyValue: duty ?? "",
+        ),
+      );
+
+      context.read<StartKmBloc>().add(
+        UploadStartingKilometerImage(
+          tripId: widget.tripId,
+          startingKilometerImage: _selectedFile!,
         ),
       );
 
@@ -350,7 +350,8 @@ class _StartingKilometerState extends State<StartingKilometer>  with WidgetsBind
                 inputFormatters: <TextInputFormatter>[
                   FilteringTextInputFormatter.digitsOnly, // ✅ allows only digits (0-9)
                 ],
-                enabled: hclhybriddata != 1, // disable when value is 1
+                // enabled: hclhybriddata != 1, // disable when value is 1
+                enabled: true, // disable when value is 1
                 decoration: InputDecoration(
                   hintText: "Starting Kilometer",
                   border: OutlineInputBorder(
@@ -460,10 +461,15 @@ class _StartingKilometerState extends State<StartingKilometer>  with WidgetsBind
                   if (state is StartKmTextSubmitted) {
                     // ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("KM Submitted Successfully")));
                     showSuccessSnackBar(context, "KM Submitted Successfully");
-                  } else if (state is StartKmImageUploaded) {
-                    // ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Image Uploaded Successfully")));
-                    showSuccessSnackBar(context, "Image Uploaded Successfully");
-                  } else if (state is StartKmError) {
+                    print(" sucrcesfully km inserted");
+                  }
+    // else if (state is StartKmImageUploaded) {
+                  //   // ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Image Uploaded Successfully")));
+                  //   showSuccessSnackBar(context, "Image Uploaded Successfully");
+                  // }
+                    else if (state is StartKmError) {
+                    print(" not km inserted");
+
                     // ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.message)));
                     showFailureSnackBar(context, state.message);
                   }

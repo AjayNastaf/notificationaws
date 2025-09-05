@@ -1561,8 +1561,10 @@ class ApiService {
     required String closeKm,
     required int hcl,
     required String duty,
+    required String finalkilometers,
   }) async {
-    final url = Uri.parse('${AppConstants.baseUrl}/closekmupdatetripsheet');
+    // final url = Uri.parse('${AppConstants.baseUrl}/closekmupdatetripsheet');
+    final url = Uri.parse('${AppConstants.baseUrl}/manualclosekmupdatetripsheet');
     try {
       print('Sending data to API: $url');
       print('Payload: {tripId: $tripId,  closekm: $closeKm, Hcl: $hcl, duty: $duty}');
@@ -1575,6 +1577,8 @@ class ApiService {
           'closekm': closeKm,
           'Hcl': hcl.toString(),
           'duty': duty,
+          'finalkilometers':finalkilometers,
+
         }),
       );
 
@@ -1593,6 +1597,62 @@ class ApiService {
   }
 
 // uploading closing kilometr to the Trip details upload screen completed
+
+
+
+
+
+
+  // uploading starting kilometr to the Trip details upload starts
+  static Future<void> finalupdateCloseKMToTripDetailsUploadScreen({
+    required String tripId,
+    required String finalcloseKm,
+    required int hcl,
+    required String duty,
+  }) async {
+    final url = Uri.parse('${AppConstants.baseUrl}/finalclosekmupdatetripsheet');
+    try {
+      print('Sending data to API: $url');
+      print('Payload Ajay: {tripId: $tripId,  closekm: $finalcloseKm, Hcl: $hcl, duty: $duty}');
+
+      final response = await http.put(
+        url,
+        headers: {'Content-Type': 'application/json'}, // Set JSON header
+        body: jsonEncode({
+          'tripId': tripId,
+          'closekm': finalcloseKm,
+          'Hcl': hcl.toString(),
+          'duty': duty,
+
+        }),
+      );
+
+      print('Response status code Ajay: ${finalcloseKm}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        print('Successfully updated Closing KM details');
+      } else {
+        throw Exception('Failed to update KM details: ${response.body}');
+      }
+    } catch (e) {
+      print('Error occurred: $e');
+      throw Exception('Error occurred: $e');
+    }
+  }
+
+// uploading closing kilometr to the Trip details upload screen completed
+
+
+
+
+
+
+
+
+
+
+
 
 
 

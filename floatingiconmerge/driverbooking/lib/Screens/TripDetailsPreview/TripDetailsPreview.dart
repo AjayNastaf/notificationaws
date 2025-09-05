@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:jessy_cabs/Networks/Api_Service.dart';
 import 'package:jessy_cabs/Screens/TollParkingUpload/TollParkingUpload.dart';
 import 'package:jessy_cabs/Utils/AllImports.dart';
@@ -32,21 +33,30 @@ class _TripDetailsPreviewState extends State<TripDetailsPreview> with WidgetsBin
   DateTime? closingDate;
   bool isStartKmEnabled = true; // Only Start KM and Close KM are enabled
   bool isCloseKmEnabled = true;
+  double totalDistanceInKm = 0.0;
 
+  String? duty;
+  int? hcl;
+
+  double roundedDistance = 0.0;
   final TextEditingController tripIdController = TextEditingController();
   final TextEditingController guestNameController = TextEditingController();
   final TextEditingController guestMobileController = TextEditingController();
   final TextEditingController vehicleTypeController = TextEditingController();
   final TextEditingController startKmController = TextEditingController();
   final TextEditingController closeKmController = TextEditingController();
+  final TextEditingController TotalKmController = TextEditingController();
   final TextEditingController startDateController = TextEditingController();
   final TextEditingController closeDateController = TextEditingController();
+  final TextEditingController GpsKmController = TextEditingController();
+  late TripUploadBloc _tripUploadBloc;
 
   String? startingImageUrl;
   String? endingImageUrl;
   bool isLoading = true;
 
 
+  static const MethodChannel _trackingChannel = MethodChannel('com.example.jessy_cabs/tracking');
 
 
   @override
@@ -54,12 +64,12 @@ class _TripDetailsPreviewState extends State<TripDetailsPreview> with WidgetsBin
     super.initState();
 
     WidgetsBinding.instance.addObserver(this);
-
     // _loadTripSheetDetailsByTripId();
     context.read<TripSheetDetailsTripIdBloc>().add(FetchTripDetailsByTripIdEventClass(tripId: widget.tripId));
       fetchImages(); // Make sure fetchImages is being called
     saveScreenData();
     TripStatusManager().start(context, widget.tripId);
+    _tripUploadBloc = TripUploadBloc();
 
   }
 
@@ -115,6 +125,15 @@ class _TripDetailsPreviewState extends State<TripDetailsPreview> with WidgetsBin
         var closedatevalue = tripDetails['closedate'].toString();
         print('Trip details guest: $tripDetails');
 
+        final double closeKm = double.tryParse(closekmvalue) ?? 0.0;
+        final double startKm = double.tryParse(startkmvalue) ?? 0.0;
+
+        final double totalKm = closeKm - startKm;
+        print('Trip details guest: $closeKm');
+        print('Trip details guest: $startKm');
+        print('Trip details guest: $totalKm');
+
+
         setState(() {
           // Populate the form fields with the fetched data
           tripIdController.text = tripIdvalue ?? '';
@@ -123,9 +142,11 @@ class _TripDetailsPreviewState extends State<TripDetailsPreview> with WidgetsBin
           vehicleTypeController.text = vectypeValue ?? '';
           startKmController.text = startkmvalue ?? '';
           closeKmController.text = closekmvalue ?? '';
+          TotalKmController.text = totalKm as String ;
           startDateController.text = startdatevalue ?? '';
           closeDateController.text = closedatevalue ?? '';
         });
+        print("ssssssssssssssssssssssssssss $TotalKmController");
 
       } else {
         print('No trip details found.');
@@ -135,52 +156,7 @@ class _TripDetailsPreviewState extends State<TripDetailsPreview> with WidgetsBin
     }
   }
 
-  Future<void> _pickDate(BuildContext context, bool isStartingDate) async {
-    final DateTime? pickedDate = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2101),
-    );
-    if (pickedDate != null) {
-      setState(() {
-        if (isStartingDate) {
-          startingDate = pickedDate;
-        } else {
-          closingDate = pickedDate;
-        }
-      });
-    }
-  }
 
-  void _openCameraOrFiles() {
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: Icon(Icons.camera_alt),
-              title: Text('Open Camera'),
-              onTap: () {
-                Navigator.pop(context);
-                // Add camera logic
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.file_upload),
-              title: Text('Upload File'),
-              onTap: () {
-                Navigator.pop(context);
-                // Add file upload logic
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
   String setFormattedDate(String? dateStr) {
     if (dateStr == null || dateStr.isEmpty) return "Not available"; // Handle null case
 
@@ -242,11 +218,6 @@ class _TripDetailsPreviewState extends State<TripDetailsPreview> with WidgetsBin
     }
   }
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   fetchImages(); // Make sure fetchImages is being called
-  // }
 
 
 //local storage of username
@@ -272,7 +243,20 @@ class _TripDetailsPreviewState extends State<TripDetailsPreview> with WidgetsBin
 
 
   void _handleSubmitModal() {
-    // Show the popup dialog
+    final dutyValue = duty ?? "";
+    final hclValue = hcl ?? 0;
+
+    _tripUploadBloc.add(UpdateClosingkm(
+      tripId: widget.tripId,
+      finalcloseKm: TotalKmController.text,
+      duty: dutyValue,
+      hcl: hclValue,
+    ));
+
+    print('Ajay ${TotalKmController.text}');
+
+
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -347,6 +331,36 @@ class _TripDetailsPreviewState extends State<TripDetailsPreview> with WidgetsBin
   }
 
 
+  // Future<void> loadSavedDistance() async {
+  //   try {
+  //     final savedDistance = await _trackingChannel.invokeMethod("getSavedDistance");
+  //     setState(() {
+  //       totalDistanceInKm = (savedDistance as num?)?.toDouble() ?? 0.0;
+  //       totalDistanceInKm /= 1000; // convert meters to kilometers
+  //       // totalDistanceInKm = 180; // convert meters to kilometers
+  //
+  //     });
+  //
+  //     print('✅ Distance loaded from native: $totalDistanceInKm km');
+  //     int roundedDistance = totalDistanceInKm.round();
+  //     // int roundedDistance = 18;
+  //
+  //     GpsKmController.text = roundedDistance.toString() ;
+  //
+  //   } catch (e) {
+  //     print('❌ Error loading distance: $e');
+  //
+  //   }
+  //
+  // }
+
+
+
+
+
+
+
+
   @override
   Widget build(BuildContext context) {
     // bool isConnected = Provider.of<NetworkManager>(context).isConnected;
@@ -370,13 +384,27 @@ class _TripDetailsPreviewState extends State<TripDetailsPreview> with WidgetsBin
             guestMobileController.text = state.tripDetails['guestmobileno'].toString()?? '';
             vehicleTypeController.text = state.tripDetails['vehType'].toString() ?? '';
             startKmController.text = state.tripDetails['startkm'].toString() ?? '';
-            closeKmController.text = state.tripDetails['closekm'].toString() ?? '';
+            // closeKmController.text = state.tripDetails['closekm'].toString() ?? '';
+            closeKmController.text = state.tripDetails['manualclosekm'].toString() ?? '';
+            GpsKmController.text = state.tripDetails['gpskilometer'].toString() ?? '';
             // startDateController.text = state.tripDetails['startdate'].toString() ?? '';
             startDateController.text = setFormattedDate(state.tripDetails['startdate'].toString()) ?? '';
             closeDateController.text = setFormattedDate(state.tripDetails['closedate'].toString()) ?? '';
             // closeDateController.text = state.tripDetails['closedate'].toString() ?? '';
+            final double closeKm = double.tryParse(closeKmController.text) ?? 0.0;
+            final double startKm = double.tryParse(startKmController.text) ?? 0.0;
+
+            final double totalKm = closeKm - startKm;
+
+              // TotalKmController.text = totalKm .toString()??'' ;
+              TotalKmController.text = totalKm.toInt().toString();
+            duty = state.tripDetails['duty'].toString() ?? '';
+            hcl= state.tripDetails['Hybriddata'] ?? '';
+
           });
-          print('Trip details guest: ${state.tripDetails}');
+          print('Trip details guest1: ${state.tripDetails}');
+          print('Trip details guest12: ${state.tripDetails}');
+          print('Trip details guest123: ${TotalKmController.text}');
         }else if(state is TripDetailsByTripIdError){
           // ScaffoldMessenger.of(context).showSnackBar(
           //   SnackBar(content: Text(state.message)),
@@ -509,21 +537,41 @@ class _TripDetailsPreviewState extends State<TripDetailsPreview> with WidgetsBin
 
                 // Closing Kilometer
               TextField(
-                        controller: closeKmController,
-                        // enabled: isCloseKmEnabled,
-                          readOnly: true,
-                          enabled: false,
-                        decoration: const InputDecoration(
-                          labelText: "Closing Kilometer",
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
-                      // Image.asset(
-                      //   AppConstants.intro_one, // Replace with your image path
-                      //   height: 100, // Set the desired height
-                      //   width: 100, // Set the desired width
-                      //   fit: BoxFit.cover, // Adjust the image's box fit
-                      // ),
+                  controller: closeKmController,
+                  // enabled: isCloseKmEnabled,
+                  readOnly: true,
+                  enabled: false,
+                  decoration: const InputDecoration(
+                    labelText: "Closing Kilometer",
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                TextField(
+                  controller: TotalKmController,
+                  // enabled: isCloseKmEnabled,
+                  readOnly: true,
+                  enabled: false,
+                  decoration: const InputDecoration(
+                    labelText: "Total Kilometer",
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+
+                TextField(
+                  controller: GpsKmController,
+                  // enabled: isCloseKmEnabled,
+                  readOnly: true,
+                  enabled: false,
+                  decoration: const InputDecoration(
+                    labelText: "Gps Tracked",
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+
 
               ],
             ),
