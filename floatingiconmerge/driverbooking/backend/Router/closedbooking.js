@@ -120,6 +120,8 @@ console.log(result,"ajjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjresuuuuuuuu")
 
 
 router.put('/closekmupdatetripsheet', (req, res) => {
+console.log("checking received aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+
   // const {startkm, tripid } = req.body;
   const { tripId, closekm ,Hcl,duty} = req.body;
   // const query = 'UPDATE tripsheet SET starttime = ?, startdate = ?, startkm = ? WHERE tripid = ?';
@@ -169,8 +171,9 @@ console.log('ajay4',typeof(duty));
 });
 
 
-
 router.put('/manualclosekmupdatetripsheet', (req, res) => {
+console.log("checking received bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb");
+
   const { tripId, closekm ,Hcl,duty,finalkilometers} = req.body;
 console.log(tripId, closekm ,Hcl,duty ,finalkilometers, "checking received");
 console.log('ajay',typeof(tripId));
@@ -182,25 +185,29 @@ console.log('ajay4',typeof(finalkilometers));
   let sql = "";
   let values = [];
 
-//  if (Hcl === '1' && duty === "Outstation") {
-//    // First condition
-//    console.log("firstttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt")
-//    sql = "UPDATE tripsheet SET  gpskilometer = ?,closekm = ? WHERE tripid = ?";
-//    values = [finalkilometers,closekm,tripId];
-//  } else if (Hcl === '1' && duty !== "Outstation") {
-//    // Second condition
-//        console.log("secondddddddddd")
-//    sql = "UPDATE tripsheet SET gpskilometer = ?,closekm = ?,vendorshedinkm = ? WHERE tripid = ?";
-//    values = [finalkilometers, closekm, closekm,tripId];
-//  } else {
-//    // Default case or other conditions
-//        console.log("thirddddd")
-//    sql = "UPDATE tripsheet SET  gpskilometer = ?,closekm = ? WHERE tripid = ?";
-//    values = [finalkilometers, closekm,tripId];
-//  }
-
+  if (Hcl === '1' && duty === "Outstation") {
+    // First condition
+    console.log("firstttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt")
     sql = "UPDATE tripsheet SET  gpskilometer = ?,manualclosekm = ? WHERE tripid = ?";
-      values = [finalkilometers,closekm,tripId];
+    values = [finalkilometers,closekm,tripId];
+  } else if (Hcl === '1' && duty !== "Outstation") {
+           console.log("secondddddddddd")
+           sql = "UPDATE tripsheet SET  gpskilometer = ?,manualclosekm = ? WHERE tripid = ?";
+          values = [finalkilometers,closekm,tripId];
+  }else if(Hcl === '0'){
+          console.log("non-hcl")
+          sql = "UPDATE tripsheet SET  gpskilometer = ?,closekm = ? WHERE tripid = ?";
+          values = [finalkilometers,closekm,tripId];
+  }
+   else {
+    // Default case or other conditions
+        console.log("thirddddd")
+        sql = "UPDATE tripsheet SET  gpskilometer = ?,manualclosekm = ? WHERE tripid = ?";
+        values = [finalkilometers, closekm,tripId];
+  }
+
+//    sql = "UPDATE tripsheet SET  gpskilometer = ?,manualclosekm = ? WHERE tripid = ?";
+//      values = [finalkilometers,closekm,tripId];
 
 
 
@@ -221,6 +228,8 @@ console.log('ajay4',typeof(finalkilometers));
 
 
 router.put('/finalclosekmupdatetripsheet', (req, res) => {
+console.log("checking received cccccccccccccccccccccccccccccccccccccccccc");
+
   const { tripId, closekm ,Hcl,duty} = req.body;
 console.log(tripId, closekm ,Hcl,duty , "checking received");
 console.log('ajay',typeof(tripId));

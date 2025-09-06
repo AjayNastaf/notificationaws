@@ -213,7 +213,7 @@ class _VerifyDeBoardimgOtpState extends State<VerifyDeBoardimgOtp> with SingleTi
 
 
 
-  int _otpTimerCount = 3; // 5 minutes in seconds
+  int _otpTimerCount = 300; // 5 minutes in seconds
   late Timer _otpResendTimer;
 
   String? guestMobileNo;

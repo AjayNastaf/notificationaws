@@ -1567,7 +1567,7 @@ class ApiService {
     final url = Uri.parse('${AppConstants.baseUrl}/manualclosekmupdatetripsheet');
     try {
       print('Sending data to API: $url');
-      print('Payload: {tripId: $tripId,  closekm: $closeKm, Hcl: $hcl, duty: $duty}');
+      print('Payload:manualclosekmupdatetripsheet {tripId: $tripId,  closekm: $closeKm, Hcl: $hcl, duty: $duty}');
 
       final response = await http.put(
         url,

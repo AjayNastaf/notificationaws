@@ -72,7 +72,7 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> with 
 // // for 5 minutes time
 
   bool _showOtpResendButton = false;
-  int _otpTimerCount = 3;
+  int _otpTimerCount = 300;
   late Timer _otpResendTimer;
 
   // GoogleMapController? _mapController;

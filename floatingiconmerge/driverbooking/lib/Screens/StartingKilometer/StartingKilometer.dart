@@ -38,8 +38,8 @@ class _StartingKilometerState extends State<StartingKilometer>  with WidgetsBind
   String guestMobileNumber = '';
 
   String guestEmail = '';
-  // final TextEditingController _startKM = TextEditingController();
-  TextEditingController _startKM = TextEditingController(text: "0");
+  // TextEditingController _startKM = TextEditingController(text: "0");
+  TextEditingController _startKM = TextEditingController();
 
   File? _selectedFile;
   final ImagePicker _picker = ImagePicker();
@@ -262,6 +262,15 @@ class _StartingKilometerState extends State<StartingKilometer>  with WidgetsBind
 //   }
   Future<void> _goToNextScreen() async {
     print("object");
+    if (_startKM.text.isEmpty) {
+
+      showInfoSnackBar(context, "Starting Kilometer is required");
+
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(content: Text("Starting Kilometer is required")),
+      // );
+      return; // stop execution
+    }
 
 
     if (_selectedFile != null) {

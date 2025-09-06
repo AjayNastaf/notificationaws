@@ -1581,8 +1581,8 @@ class _HomescreenState extends State<Homescreen> {
                     context,
                     title: '${trip['duty']}',
                     dateTime: '${trip['tripid']}',
-                    buttonText: '${trip['apps']}',
-                    // buttonText: '${trip['Hybriddata']}',
+                    // buttonText: '${trip['apps']}',
+                    buttonText: '${trip['Hybriddata']}',
                     // isEnabled: isFirstItem,  // Pass enabled status
                     isEnabled: isItemEnabled,  // Pass enabled status
 

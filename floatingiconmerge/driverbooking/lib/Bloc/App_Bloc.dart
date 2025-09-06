@@ -841,6 +841,8 @@ class TripUploadBloc extends Bloc<TripUploadEvent, TripUploadState> {
         finalkilometers:event.finalkilometers,
       );
 
+      print('gffffffffmanualclosekmupdatetripsheet ${ event.hcl}');
+
       emit(TripUploadSuccess("Closing Kilometer details updated successfully"));
     } catch (error) {
       emit(TripUploadFailure("Error updating data: $error"));
@@ -856,7 +858,6 @@ class TripUploadBloc extends Bloc<TripUploadEvent, TripUploadState> {
         hcl: event.hcl,
         duty: event.duty,
       );
-
       emit(TripUploadSuccess("Closing Kilometer details updated successfully"));
     } catch (error) {
       emit(TripUploadFailure("Error updating data: $error"));

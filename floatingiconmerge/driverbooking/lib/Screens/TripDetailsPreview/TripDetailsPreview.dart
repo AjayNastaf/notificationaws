@@ -245,14 +245,15 @@ class _TripDetailsPreviewState extends State<TripDetailsPreview> with WidgetsBin
   void _handleSubmitModal() {
     final dutyValue = duty ?? "";
     final hclValue = hcl ?? 0;
-
-    _tripUploadBloc.add(UpdateClosingkm(
-      tripId: widget.tripId,
-      finalcloseKm: TotalKmController.text,
-      duty: dutyValue,
-      hcl: hclValue,
-    ));
-
+if(hcl == 1) {
+  print('object for last api');
+  _tripUploadBloc.add(UpdateClosingkm(
+    tripId: widget.tripId,
+    finalcloseKm: TotalKmController.text,
+    duty: dutyValue,
+    hcl: hclValue,
+  ));
+}
     print('Ajay ${TotalKmController.text}');
 
 
@@ -379,13 +380,21 @@ class _TripDetailsPreviewState extends State<TripDetailsPreview> with WidgetsBin
         if(state is TripDetailsByTripIdLoaded){
           setState(() {
 
+            duty = state.tripDetails['duty'].toString() ?? '';
+            hcl= state.tripDetails['Hybriddata'] ?? '';
+
             tripIdController.text = state.tripDetails['tripid'].toString() ?? '';
             guestNameController.text = state.tripDetails['guestname'] ?? '';
             guestMobileController.text = state.tripDetails['guestmobileno'].toString()?? '';
             vehicleTypeController.text = state.tripDetails['vehType'].toString() ?? '';
             startKmController.text = state.tripDetails['startkm'].toString() ?? '';
             // closeKmController.text = state.tripDetails['closekm'].toString() ?? '';
-            closeKmController.text = state.tripDetails['manualclosekm'].toString() ?? '';
+if (hcl==1){
+  closeKmController.text = state.tripDetails['manualclosekm'].toString() ?? '';
+}else if(hcl==0){
+  closeKmController.text = state.tripDetails['closekm'].toString() ?? '';
+
+}
             GpsKmController.text = state.tripDetails['gpskilometer'].toString() ?? '';
             // startDateController.text = state.tripDetails['startdate'].toString() ?? '';
             startDateController.text = setFormattedDate(state.tripDetails['startdate'].toString()) ?? '';
@@ -398,11 +407,10 @@ class _TripDetailsPreviewState extends State<TripDetailsPreview> with WidgetsBin
 
               // TotalKmController.text = totalKm .toString()??'' ;
               TotalKmController.text = totalKm.toInt().toString();
-            duty = state.tripDetails['duty'].toString() ?? '';
-            hcl= state.tripDetails['Hybriddata'] ?? '';
+
 
           });
-          print('Trip details guest1: ${state.tripDetails}');
+          print('Trip details guest1: ${hcl}');
           print('Trip details guest12: ${state.tripDetails}');
           print('Trip details guest123: ${TotalKmController.text}');
         }else if(state is TripDetailsByTripIdError){
@@ -560,7 +568,8 @@ class _TripDetailsPreviewState extends State<TripDetailsPreview> with WidgetsBin
                 ),
                 const SizedBox(height: 16),
 
-
+    hcl == 1
+    ?
                 TextField(
                   controller: GpsKmController,
                   // enabled: isCloseKmEnabled,
@@ -570,8 +579,8 @@ class _TripDetailsPreviewState extends State<TripDetailsPreview> with WidgetsBin
                     labelText: "Gps Tracked",
                     border: OutlineInputBorder(),
                   ),
-                ),
-
+                )
+  :SizedBox.shrink(),
 
               ],
             ),

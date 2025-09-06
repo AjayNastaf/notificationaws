@@ -183,6 +183,8 @@ String ? finalkilometers ;
 
 
       });
+
+      print('aaaaaaaaaafffffaaaa${tripDetails['Hybriddata']}');
     } else {
       print('No trip details found in shared preferences.');
     }
@@ -1044,26 +1046,17 @@ String ? finalkilometers ;
                                     if(_selectedImage2 == null){
                                       return showFailureSnackBar(context, "Please, Upload Closing Kilometer");
                                     };
+                                    if(closeKmController.text.isEmpty){
+                                      return showInfoSnackBar(context, "Closing Kilometer is required");
+
+
+                                    }
 
                                     setState(() {
                                       _isLoading = true;
                                     });
 
-                                    // if (closeKmController.text.isEmpty || _selectedImage2 == null) {
-                                    //
-                                    //   showWarningSnackBar(context, 'Please upload closing kilometer and image');
-                                    //   return;
-                                    // }
-                                    // _tripUploadBloc.add(UploadClosingKmText(tripId: widget.tripId));
-                                    // _tripUploadBloc.add(UploadClosingKmImage(tripId: widget.tripId, image: _selectedImage2!));
-                                    // final dutyValue = duty ?? "";
-                                    // final hclValue = hcl ?? 0;
-                                    // _tripUploadBloc.add(UpdateSignatureStatus(
-                                    //   tripId: widget.tripId,
-                                    //   closeKm: closeKmController.text,
-                                    //   duty: dutyValue,
-                                    //   hcl: hclValue,
-                                    // ));
+
 
                                     print('object huijfd');
                                     context.read<EmailBloc>().add(SendEmailEvent(
@@ -1097,7 +1090,7 @@ String ? finalkilometers ;
                                     }
 
                                     final dutyValue = duty ?? "";
-                                    final hclValue = hcl ?? 0;
+                                    final hclValue = hcl ?? 10;
                                     final finalkilometervar = finalkilometers??'';
 
                                     _tripUploadBloc.add(UpdateSignatureStatus(
